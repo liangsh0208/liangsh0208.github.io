@@ -1,7 +1,8 @@
 # 站点基础设置
 title: 我的技术博客
-description: 分享编程与思考
-author: 你的名字
+description: 大模型全栈技术分享
+url: "https://liangshihao.github.io" # 站点 URL
+author: liangshihao
 
 # 主题选择（官方预置，直接生效）
 # 可选: minima, 默认为 minima，也可以从远程仓库引入主题
