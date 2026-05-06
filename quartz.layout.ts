@@ -8,8 +8,7 @@ export const sharedPageComponents: SharedLayout = {
   afterBody: [],
   footer: Component.Footer({
     links: {
-      GitHub: "https://github.com/jackyzha0/quartz",
-      "Discord Community": "https://discord.gg/cRFFHYye7t",
+      GitHub: "https://github.com/liangsh0208",
     },
   }),
 }
@@ -35,19 +34,16 @@ export const defaultContentPageLayout: PageLayout = {
           grow: true,
         },
         { Component: Component.Darkmode() },
-        { Component: Component.ReaderMode() },
       ],
     }),
     Component.Explorer({
       folderDefaultState: "open",
       folderClickBehavior: "collapse",
-      title: "笔记分类",
+      title: "目录",
     }),
   ],
   right: [
-    Component.Graph(),
     Component.DesktopOnly(Component.TableOfContents()),
-    Component.Backlinks(),
   ],
 }
 
@@ -69,7 +65,7 @@ export const defaultListPageLayout: PageLayout = {
     Component.Explorer({
       folderDefaultState: "open",
       folderClickBehavior: "collapse",
-      title: "笔记分类",
+      title: "目录",
     }),
   ],
   right: [],
