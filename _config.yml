@@ -25,5 +25,8 @@ plugins:
   - jekyll-archives
   - jekyll-include-cache
 
+baseurl: ""
+future: true
+
 # 文章设置
 paginate: 10
