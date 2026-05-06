@@ -332,7 +332,7 @@ body .page {
   stroke: #c2c6cc;
 }
 
-/* ===== Recent Notes (Blog Homepage) ===== */
+/* ===== Recent Notes (Chirpy-style cards) ===== */
 .recent-notes {
   margin-top: 2.5rem;
 }
@@ -350,64 +350,91 @@ body .page {
   list-style: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
 .recent-li {
-  margin-bottom: 1.75rem;
-  padding-bottom: 1.75rem;
-  border-bottom: 1px solid rgba(128,128,128,0.1);
+  border: 1px solid rgba(128,128,128,0.12);
+  border-radius: 10px;
+  background: rgba(128,128,128,0.02);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
 }
 
-.recent-li:last-child {
-  border-bottom: none;
+.recent-li:hover {
+  border-color: rgba(128,128,128,0.22);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+}
+
+.recent-li .section {
+  padding: 1.25rem 1.5rem;
 }
 
 .recent-li .section > .desc > h3 {
-  margin: 0 0 0.35rem 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.recent-li .section > .desc > h3 a {
-  color: var(--dark);
-  text-decoration: none;
-  border-bottom: none;
-  background: none;
-  transition: color 0.2s ease;
-}
-
-.recent-li .section > .desc > h3 a:hover {
-  color: var(--secondary);
-  text-decoration: none;
-}
-
-.recent-li .section > .meta {
   margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--dark);
+}
+
+.recent-li .desc-text {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--darkgray);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.recent-li .section > .meta-row > .meta {
+  margin: 0;
   font-size: 0.8rem;
   color: var(--gray);
   opacity: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.recent-li .section > .tags {
+.recent-li .section > .meta-row > .tags {
   list-style: none;
   padding: 0;
-  margin: 0.5rem 0 0 0;
+  margin: 0;
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
 
-.recent-li .section > .tags li a {
+.recent-li .section > .meta-row > .tags li a {
   font-size: 0.75rem;
 }
 
+/* Dark mode */
 :root[saved-theme="dark"] .recent-notes > h3 {
   border-bottom-color: rgba(255,255,255,0.1);
 }
 
 :root[saved-theme="dark"] .recent-li {
-  border-bottom-color: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+}
+
+:root[saved-theme="dark"] .recent-li:hover {
+  border-color: rgba(255,255,255,0.15);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
 /* ===== Footer ===== */
