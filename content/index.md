@@ -10,4 +10,7 @@ description: 大模型全栈技术笔记（训练 / 推理 / 框架）
 - X（Twitter）
 - https://developer.nvidia.com/
 - 终极指南： https://huggingface.co/spaces/Ki-Seki/ultrascale-playbook-zh-cn
+- https://deepwiki.com/
+
+
 
