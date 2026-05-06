@@ -223,7 +223,7 @@ body .page {
 
 /* Explorer */
 .explorer .title-button h2 {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -238,13 +238,13 @@ body .page {
 }
 
 .folder-container button span {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #34343c;
   font-weight: 500;
 }
 
 .folder-container div > a {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--secondary);
   font-weight: 500;
 }
@@ -330,6 +330,84 @@ body .page {
 
 .search-button svg {
   stroke: #c2c6cc;
+}
+
+/* ===== Recent Notes (Blog Homepage) ===== */
+.recent-notes {
+  margin-top: 2.5rem;
+}
+
+.recent-notes > h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(128,128,128,0.12);
+  padding-bottom: 0.5rem;
+}
+
+.recent-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-li {
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.75rem;
+  border-bottom: 1px solid rgba(128,128,128,0.1);
+}
+
+.recent-li:last-child {
+  border-bottom: none;
+}
+
+.recent-li .section > .desc > h3 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.recent-li .section > .desc > h3 a {
+  color: var(--dark);
+  text-decoration: none;
+  border-bottom: none;
+  background: none;
+  transition: color 0.2s ease;
+}
+
+.recent-li .section > .desc > h3 a:hover {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+.recent-li .section > .meta {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.8rem;
+  color: var(--gray);
+  opacity: 1;
+}
+
+.recent-li .section > .tags {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.recent-li .section > .tags li a {
+  font-size: 0.75rem;
+}
+
+:root[saved-theme="dark"] .recent-notes > h3 {
+  border-bottom-color: rgba(255,255,255,0.1);
+}
+
+:root[saved-theme="dark"] .recent-li {
+  border-bottom-color: rgba(255,255,255,0.08);
 }
 
 /* ===== Footer ===== */
