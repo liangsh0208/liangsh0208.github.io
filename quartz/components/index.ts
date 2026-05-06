@@ -27,6 +27,7 @@ import ProfileCard from "./ProfileCard"
 import TagCloud from "./TagCloud"
 import TopicCards from "./TopicCards"
 import FolderTree from "./FolderTree"
+import HomeLink from "./HomeLink"
 
 export {
   ArticleTitle,
@@ -58,4 +59,5 @@ export {
   FolderTree,
   ProfileCard,
   TagCloud,
+  HomeLink,
 }

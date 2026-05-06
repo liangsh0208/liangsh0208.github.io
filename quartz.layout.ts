@@ -64,10 +64,11 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
+    Component.HomeLink(),
     Component.Explorer({
       folderDefaultState: "collapsed",
       folderClickBehavior: "collapse",
-      title: "目录",
+      title: "",
     }),
   ],
   right: [
@@ -90,10 +91,11 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
+    Component.HomeLink(),
     Component.Explorer({
       folderDefaultState: "collapsed",
       folderClickBehavior: "collapse",
-      title: "目录",
+      title: "",
     }),
   ],
   right: [],

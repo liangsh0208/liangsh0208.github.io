@@ -222,6 +222,10 @@ body .page {
 }
 
 /* Explorer */
+.title-button h2:empty {
+  display: none;
+}
+
 .explorer .title-button h2 {
   font-size: 0.8rem;
   font-weight: 600;
@@ -237,23 +241,8 @@ body .page {
   border-left: 1px solid #e0e0e0;
 }
 
-.folder-container button span {
-  font-size: 0.875rem;
-  color: #34343c;
-  font-weight: 500;
-}
-
-.folder-container div > a {
-  font-size: 0.875rem;
-  color: var(--secondary);
-  font-weight: 500;
-}
-
-.folder-icon {
-  color: #8c959f;
-  transition: color 0.2s ease;
-}
-
+.folder-container button span,
+.folder-container div > a,
 .explorer-content a {
   font-size: 0.875rem;
   color: #34343c;
@@ -261,9 +250,15 @@ body .page {
   text-decoration: none;
 }
 
+.folder-container button span:hover,
+.folder-container div > a:hover,
 .explorer-content a:hover {
   color: var(--secondary);
-  text-decoration: none;
+}
+
+.folder-icon {
+  color: #8c959f;
+  transition: color 0.2s ease;
 }
 
 .explorer-content a.active {
