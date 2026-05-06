@@ -9,7 +9,7 @@ export const sharedPageComponents: SharedLayout = {
     Component.ConditionalRender({
       component: Component.RecentNotes({
         title: "最新笔记",
-        limit: 10,
+        limit: 15,
         linkToMore: false,
         showTags: true,
         filter: (f) => f.slug !== "index",
@@ -31,9 +31,18 @@ export const defaultContentPageLayout: PageLayout = {
       component: Component.Breadcrumbs(),
       condition: (page) => page.fileData.slug !== "index",
     }),
-    Component.ArticleTitle(),
-    Component.ContentMeta(),
-    Component.TagList(),
+    Component.ConditionalRender({
+      component: Component.ArticleTitle(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.ContentMeta(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
+    Component.ConditionalRender({
+      component: Component.TagList(),
+      condition: (page) => page.fileData.slug !== "index",
+    }),
   ],
   left: [
     Component.PageTitle(),
