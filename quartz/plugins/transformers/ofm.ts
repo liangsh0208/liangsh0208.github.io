@@ -22,7 +22,7 @@ import checkboxScript from "../../components/scripts/checkbox.inline"
 // @ts-ignore
 import mermaidScript from "../../components/scripts/mermaid.inline"
 import mermaidStyle from "../../components/styles/mermaid.inline.scss"
-import { FilePath, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
+import { FilePath, joinSegments, pathToRoot, slugTag, slugifyFilePath } from "../../util/path"
 import { toHast } from "mdast-util-to-hast"
 import { toHtml } from "hast-util-to-html"
 import { capitalize } from "../../util/lang"
@@ -229,7 +229,14 @@ export const ObsidianFlavoredMarkdown: QuartzTransformerPlugin<Partial<Options>>
                 // embed cases
                 if (value.startsWith("!")) {
                   const ext: string = path.extname(fp).toLowerCase()
-                  const url = slugifyFilePath(fp as FilePath)
+                  let url = slugifyFilePath(fp as FilePath)
+                  // Resolve relative wiki-links against current file's directory, matching Obsidian behavior
+                  if (!fp.startsWith("/") && !fp.startsWith("./") && !fp.startsWith("../")) {
+                    const currentDir = file.data.slug!.split("/").slice(0, -1).join("/")
+                    if (currentDir) {
+                      url = joinSegments(currentDir, url)
+                    }
+                  }
                   if ([".png", ".jpg", ".jpeg", ".gif", ".bmp", ".svg", ".webp"].includes(ext)) {
                     const match = wikilinkImageEmbedRegex.exec(alias ?? "")
                     const alt = match?.groups?.alt ?? ""

@@ -118,7 +118,8 @@ code {
 
 pre {
   font-family: "JetBrains Mono", "Fira Code", monospace;
-  background: #1f2328;
+  background: var(--lightgray);
+  border: 1px solid rgba(128,128,128,0.12);
   border-radius: 8px;
   padding: 1.25rem;
   overflow-x: auto;
@@ -129,7 +130,7 @@ pre {
 pre code {
   background: none;
   padding: 0;
-  color: #e6edf3;
+  color: var(--dark);
   font-size: 0.85rem;
 }
 
@@ -654,7 +655,7 @@ footer {
 
 /* ===== Article images: limit size ===== */
 article img {
-  max-width: 50%;
+  max-width: 70%;
   height: auto;
 }
 
