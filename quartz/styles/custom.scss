@@ -1,3 +1,58 @@
 @use "./base.scss";
 
-// put your custom CSS here!
+/* Load Chinese font fallback */
+body {
+  font-family: "Source Sans Pro", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6, thead {
+  font-family: "Lato", "Microsoft YaHei", "PingFang SC", sans-serif;
+}
+
+/* Chirpy-like typography overrides */
+
+article {
+  line-height: 1.75;
+
+  & > h1 {
+    font-size: 1.75rem;
+  }
+
+  & > p {
+    margin-bottom: 1.25rem;
+  }
+
+  & ul,
+  & ol {
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Sidebar refinements */
+.sidebar.left {
+  background: var(--lightgray) !important;
+  border-right: 1px solid #efefef !important;
+}
+
+/* Explorer tree indentation */
+.folder-outer > ul {
+  margin-left: 8px;
+  padding-left: 0.6rem;
+  border-left: 1px solid #e0e0e0;
+}
+
+/* Softer link underlining in paragraphs */
+article a {
+  text-decoration: underline;
+  text-decoration-color: #dee2e6;
+  text-underline-offset: 3px;
+}
+
+article a:hover {
+  text-decoration-color: var(--secondary);
+}
+
+/* Code blocks closer to Chirpy */
+pre {
+  border-radius: 6px;
+}

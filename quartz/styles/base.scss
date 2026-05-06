@@ -222,7 +222,7 @@ a {
       gap: 1.2rem;
       top: 0;
       box-sizing: border-box;
-      padding: $topSpacing 2rem 2rem 2rem;
+      padding: $topSpacing 1.5rem 2rem 1.5rem;
       display: flex;
       height: 100vh;
       position: sticky;
@@ -232,6 +232,8 @@ a {
       z-index: 1;
       grid-area: grid-sidebar-left;
       flex-direction: column;
+      background: var(--lightgray);
+      border-right: 1px solid var(--lightgray);
       @media all and ($mobile) {
         gap: 0;
         align-items: center;
