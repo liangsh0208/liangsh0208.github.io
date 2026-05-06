@@ -129,10 +129,20 @@ function createFolderNode(
     span.textContent = node.displayName
   }
 
-  // if the saved state is collapsed or the default state is collapsed
-  const isCollapsed =
-    currentExplorerState.find((item) => item.path === folderPath)?.collapsed ??
-    opts.folderDefaultState === "collapsed"
+  // Leaf folder: no sub-folders — collapse by default
+  const hasSubFolders = node.children.some((child) => child.isFolder)
+  const savedCollapsed = currentExplorerState.find(
+    (item) => item.path === folderPath,
+  )?.collapsed
+
+  let isCollapsed: boolean
+  if (!hasSubFolders) {
+    isCollapsed = true
+  } else if (savedCollapsed !== undefined) {
+    isCollapsed = savedCollapsed
+  } else {
+    isCollapsed = opts.folderDefaultState === "collapsed"
+  }
 
   // if this folder is a prefix of the current path we
   // want to open it anyways

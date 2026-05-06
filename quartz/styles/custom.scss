@@ -226,15 +226,6 @@ body .page {
   display: none;
 }
 
-.explorer .title-button h2 {
-  font-size: 0.8rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--gray);
-  margin: 0;
-}
-
 .folder-outer > ul {
   margin-left: 0;
   padding-left: 0.35rem;
@@ -624,6 +615,41 @@ footer {
 
 :root[saved-theme="dark"] .folder-content ul > li {
   border-bottom-color: rgba(255,255,255,0.1);
+}
+
+/* ===== Homepage article (front-matter content) matches RecentNotes ===== */
+.page-index article > p:first-of-type {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--darkgray);
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(128,128,128,0.1);
+}
+
+.page-index article > ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem 0;
+}
+
+.page-index article > ul > li {
+  border-bottom: 1px solid rgba(128,128,128,0.06);
+  padding: 0.9rem 0;
+}
+
+.page-index article > ul > li:last-child {
+  border-bottom: none;
+}
+
+.page-index article > ul > li a {
+  color: var(--darkgray);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.page-index article > ul > li a:hover {
+  color: var(--secondary);
 }
 
 /* ===== Responsive ===== */
