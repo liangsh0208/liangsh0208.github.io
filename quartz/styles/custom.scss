@@ -354,8 +354,13 @@ body .page {
   margin-top: 0;
 }
 
-.recent-notes > h3 {
-  display: none;
+.page-index .recent-notes > h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--darkgray);
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid rgba(128,128,128,0.1);
 }
 
 .recent-ul {

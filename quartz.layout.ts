@@ -7,9 +7,13 @@ export const sharedPageComponents: SharedLayout = {
   header: [],
   afterBody: [
     Component.ConditionalRender({
+      component: Component.TopicCards(),
+      condition: (page) => page.fileData.slug === "index",
+    }),
+    Component.ConditionalRender({
       component: Component.RecentNotes({
-        title: "最新笔记",
-        limit: 15,
+        title: "Recently Updated",
+        limit: 10,
         linkToMore: false,
         showTags: true,
         filter: (f) => f.slug !== "index",
@@ -63,20 +67,7 @@ export const defaultContentPageLayout: PageLayout = {
     }),
   ],
   right: [
-    Component.ConditionalRender({
-      component: Component.RecentNotes({
-        title: "Recently Updated",
-        limit: 5,
-        linkToMore: false,
-        showTags: false,
-        filter: (f) => f.slug !== "index",
-      }),
-      condition: (page) => page.fileData.slug === "index",
-    }),
-    Component.ConditionalRender({
-      component: Component.DesktopOnly(Component.TableOfContents()),
-      condition: (page) => page.fileData.slug !== "index",
-    }),
+    Component.DesktopOnly(Component.TableOfContents()),
   ],
 }
 
