@@ -10,4 +10,5 @@ group :jekyll_plugins do
   gem "jekyll-sitemap"
   gem "jekyll-archives"
   gem "jekyll-include-cache"
+  gem "jekyll-remote-theme"
 end
