@@ -18,16 +18,16 @@ h1, h2, h3, h4, h5, h6, thead {
   letter-spacing: -0.01em;
 }
 
-h1 { font-size: 2rem; line-height: 1.3; margin-top: 2.5rem; margin-bottom: 1rem; }
-h2 { font-size: 1.5rem; line-height: 1.35; margin-top: 2.25rem; margin-bottom: 0.875rem; border-bottom: 1px solid rgba(128,128,128,0.18); padding-bottom: 0.4rem; }
-h3 { font-size: 1.25rem; line-height: 1.4; margin-top: 2rem; margin-bottom: 0.75rem; }
-h4 { font-size: 1.1rem; line-height: 1.45; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+h1 { font-size: 2.25rem; line-height: 1.25; margin-top: 2.5rem; margin-bottom: 1.25rem; }
+h2 { font-size: 1.625rem; line-height: 1.35; margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(128,128,128,0.18); padding-bottom: 0.4rem; }
+h3 { font-size: 1.375rem; line-height: 1.4; margin-top: 2rem; margin-bottom: 0.875rem; }
+h4 { font-size: 1.15rem; line-height: 1.45; margin-top: 1.5rem; margin-bottom: 0.75rem; }
 
 /* Article content */
 article > p {
-  font-size: 1rem;
-  line-height: 1.8;
-  margin-bottom: 1.25rem;
+  font-size: 1.05rem;
+  line-height: 1.85;
+  margin-bottom: 1.35rem;
 }
 
 article > ul, article > ol {
@@ -175,9 +175,7 @@ hr {
 }
 
 .center > article {
-  max-width: 780px;
-  margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2.5rem;
 }
 
 /* ===== Left Sidebar (Light) ===== */
