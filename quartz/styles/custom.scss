@@ -169,13 +169,27 @@ hr {
   margin: 2.5rem 0;
 }
 
-/* ===== Layout ===== */
-.page {
-  max-width: 1440px;
+/* ===== Layout: full-width like Chirpy ===== */
+body .page {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Ensure content area uses available space */
+#quartz-body {
+  width: 100%;
+}
+
+/* Give article breathing room but let it grow */
+.center {
+  width: 100%;
+  min-width: 0; /* allow flex/grid children to shrink */
 }
 
 .center > article {
   padding: 0 2.5rem;
+  max-width: none;
 }
 
 /* ===== Left Sidebar (Light) ===== */
