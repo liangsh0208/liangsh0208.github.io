@@ -7,7 +7,7 @@ export const sharedPageComponents: SharedLayout = {
   header: [],
   afterBody: [
     Component.ConditionalRender({
-      component: Component.TopicCards(),
+      component: Component.FolderTree(),
       condition: (page) => page.fileData.slug === "index",
     }),
     Component.ConditionalRender({
@@ -61,7 +61,7 @@ export const defaultContentPageLayout: PageLayout = {
       ],
     }),
     Component.Explorer({
-      folderDefaultState: "open",
+      folderDefaultState: "collapsed",
       folderClickBehavior: "collapse",
       title: "目录",
     }),
@@ -87,7 +87,7 @@ export const defaultListPageLayout: PageLayout = {
       ],
     }),
     Component.Explorer({
-      folderDefaultState: "open",
+      folderDefaultState: "collapsed",
       folderClickBehavior: "collapse",
       title: "目录",
     }),
