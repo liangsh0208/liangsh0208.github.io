@@ -16,6 +16,53 @@
   --sidebar-border: #efefef;
   --border-color: #eaeaea;
   --border-light: #f3f3f3;
+  --code-bg: #1f2328;
+  --code-text: #e6edf3;
+}
+
+html[saved-theme="dark"] {
+  --light: #1e1e1e;
+  --lightgray: #2d2d2d;
+  --gray: #8b949e;
+  --darkgray: #c9d1d9;
+  --dark: #f0f0f0;
+  --secondary: #58a6ff;
+  --tertiary: #8b949e;
+  --highlight: rgba(88, 166, 255, 0.15);
+  --textHighlight: rgba(255, 248, 197, 0.2);
+  --sidebar-bg: #252525;
+  --sidebar-border: #3a3a3a;
+  --border-color: #444c56;
+  --border-light: #333333;
+  --code-bg: #161b22;
+  --code-text: #c9d1d9;
+}
+
+html[saved-theme="dark"] body {
+  background: #1e1e1e;
+  color: #c9d1d9;
+}
+
+html[saved-theme="dark"] pre {
+  background: var(--code-bg);
+}
+
+html[saved-theme="dark"] pre code {
+  color: var(--code-text);
+}
+
+html[saved-theme="dark"] blockquote {
+  background: rgba(88, 166, 255, 0.06);
+  border-left-color: #58a6ff;
+}
+
+html[saved-theme="dark"] .sidebar.left {
+  background: #252525 !important;
+  border-right-color: #3a3a3a !important;
+}
+
+html[saved-theme="dark"] table tbody tr:nth-child(even) {
+  background: #222222;
 }
 
 /* Typography */
@@ -201,22 +248,31 @@ hr {
 }
 
 /* ===== Left Sidebar ===== */
+.sidebar {
+  gap: 0.8rem;
+}
+
 .sidebar.left {
   background: var(--sidebar-bg) !important;
   border-right: 1px solid var(--sidebar-border) !important;
-  padding: 2.5rem 1.25rem 2rem 1.25rem;
+  padding: 1.25rem 0.75rem 2rem 0.75rem;
+}
+
+html[saved-theme="dark"] .sidebar.left {
+  background: #252525 !important;
+  border-right-color: #3a3a3a !important;
 }
 
 /* Page title in sidebar */
 .page-title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: #1d1d1d;
+  color: var(--dark);
   margin-bottom: 0.25rem;
 }
 
 .page-title a {
-  color: #1d1d1d;
+  color: var(--dark);
   text-decoration: none;
 }
 
@@ -236,9 +292,9 @@ hr {
 }
 
 .folder-outer > ul {
-  margin-left: 4px;
-  padding-left: 0.6rem;
-  border-left: 1px solid #e0e0e0;
+  margin-left: 0;
+  padding-left: 0.35rem;
+  border-left: 1px solid var(--border-color);
 }
 
 .folder-container button span {
