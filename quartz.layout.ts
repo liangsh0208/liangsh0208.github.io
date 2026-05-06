@@ -38,7 +38,11 @@ export const defaultContentPageLayout: PageLayout = {
         { Component: Component.ReaderMode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      folderDefaultState: "open",
+      folderClickBehavior: "collapse",
+      title: "笔记分类",
+    }),
   ],
   right: [
     Component.Graph(),
@@ -62,7 +66,11 @@ export const defaultListPageLayout: PageLayout = {
         { Component: Component.Darkmode() },
       ],
     }),
-    Component.Explorer(),
+    Component.Explorer({
+      folderDefaultState: "open",
+      folderClickBehavior: "collapse",
+      title: "笔记分类",
+    }),
   ],
   right: [],
 }
