@@ -69,8 +69,8 @@ const config: QuartzConfig = {
       Plugin.TableOfContents(),
       Plugin.CrawlLinks({ markdownLinkResolution: "shortest" }),
       Plugin.Description({
-        descriptionLength: 300,
-        maxDescriptionLength: 500,
+        descriptionLength: 800,
+        maxDescriptionLength: 2000,
       }),
       Plugin.Latex({ renderEngine: "katex" }),
     ],

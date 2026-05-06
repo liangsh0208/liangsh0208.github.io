@@ -377,10 +377,6 @@ body .page {
   border-bottom: none;
 }
 
-.recent-li:hover {
-  background: rgba(128,128,128,0.03);
-}
-
 .recent-li .section {
   padding: 0;
 }
@@ -396,11 +392,6 @@ body .page {
   color: var(--darkgray);
   background: none;
   text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.recent-li:hover .section > .desc > h3 a {
-  color: var(--secondary);
 }
 
 .recent-li .desc-text {
@@ -492,9 +483,6 @@ body .page {
   border-bottom: none;
 }
 
-.right.sidebar .recent-li:hover {
-  background: rgba(128,128,128,0.03);
-}
 
 .right.sidebar .recent-li .section > .desc > h3 {
   margin: 0;
@@ -507,10 +495,6 @@ body .page {
   color: var(--darkgray);
   background: none;
   text-decoration: none;
-}
-
-.right.sidebar .recent-li:hover .section > .desc > h3 a {
-  color: var(--secondary);
 }
 
 .right.sidebar .recent-li .desc-text {
