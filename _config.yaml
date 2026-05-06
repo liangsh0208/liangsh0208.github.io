@@ -11,3 +11,8 @@ theme: minima
 # 文章列表分页（可选，如果装了 jekyll-paginate 插件）
 paginate: 5
 paginate_path: "/blog/page:num/"
+
+# 导航栏页面
+header_pages:
+  - about.md
+  - categories.md

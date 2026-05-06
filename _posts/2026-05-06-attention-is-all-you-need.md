@@ -1,4 +1,10 @@
 
+---
+layout: post
+title: "Attention Is All You Need"
+categories: 论文
+---
+
 paper 地址： https://arxiv.org/pdf/1706.03762
 
 - 复习基础的transformer 结构和最原始的实现公式算法。
