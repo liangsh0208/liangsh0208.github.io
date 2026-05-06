@@ -338,12 +338,11 @@ body .page {
 }
 
 .recent-notes > h3 {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   font-weight: 600;
-  color: var(--dark);
-  margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(128,128,128,0.12);
-  padding-bottom: 0.5rem;
+  color: var(--darkgray);
+  margin-bottom: 1rem;
+  padding-bottom: 0.4rem;
 }
 
 .recent-ul {
@@ -352,39 +351,55 @@ body .page {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 0.65rem;
 }
 
 .recent-li {
-  border: 1px solid rgba(128,128,128,0.12);
-  border-radius: 10px;
+  border: 1px solid rgba(128,128,128,0.08);
+  border-radius: 8px;
   background: rgba(128,128,128,0.02);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: border-color 0.2s ease, background 0.2s ease;
   overflow: hidden;
+  position: relative;
+  cursor: pointer;
 }
 
 .recent-li:hover {
-  border-color: rgba(128,128,128,0.22);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  border-color: rgba(128,128,128,0.18);
+  background: rgba(128,128,128,0.04);
+}
+
+.recent-li:active {
+  background: rgba(128,128,128,0.06);
 }
 
 .recent-li .section {
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.25rem;
 }
 
 .recent-li .section > .desc > h3 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.25rem;
+  margin: 0 0 0.35rem 0;
+  font-size: 1.15rem;
   font-weight: 600;
   line-height: 1.35;
-  color: var(--dark);
+}
+
+.recent-li .section > .desc > h3 a {
+  color: var(--darkgray);
+  text-decoration: none;
+  background: none;
+  transition: color 0.2s ease;
+}
+
+.recent-li:hover .section > .desc > h3 a {
+  color: var(--secondary);
 }
 
 .recent-li .desc-text {
-  margin: 0 0 0.75rem 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: var(--darkgray);
+  margin: 0 0 0.6rem 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--gray);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -395,18 +410,18 @@ body .page {
 .meta-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
 }
 
 .recent-li .section > .meta-row > .meta {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--gray);
-  opacity: 1;
+  opacity: 0.85;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .recent-li .section > .meta-row > .tags {
@@ -415,26 +430,25 @@ body .page {
   margin: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.3rem;
 }
 
 .recent-li .section > .meta-row > .tags li a {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 /* Dark mode */
 :root[saved-theme="dark"] .recent-notes > h3 {
-  border-bottom-color: rgba(255,255,255,0.1);
+  color: var(--darkgray);
 }
 
 :root[saved-theme="dark"] .recent-li {
-  border-color: rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.015);
 }
 
 :root[saved-theme="dark"] .recent-li:hover {
-  border-color: rgba(255,255,255,0.15);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  border-color: rgba(255,255,255,0.12);
 }
 
 /* ===== Footer ===== */

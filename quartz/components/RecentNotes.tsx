@@ -93,5 +93,16 @@ export default ((userOpts?: Partial<Options>) => {
   }
 
   RecentNotes.css = style
+
+  RecentNotes.afterDOMLoaded = `
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.recent-li')
+  if (!card) return
+  if (e.target.closest('a')) return
+  const link = card.querySelector('.desc h3 a')
+  if (link) link.click()
+}, true)
+  `
+
   return RecentNotes
 }) satisfies QuartzComponentConstructor
