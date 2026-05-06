@@ -2,7 +2,8 @@
 ---
 layout: post
 title: "Attention Is All You Need"
-categories: 论文
+date: 2026-05-06 00:00:00 +0800
+categories: [论文]
 ---
 
 paper 地址： https://arxiv.org/pdf/1706.03762

@@ -1,8 +1,8 @@
 ---
 layout: post
 title: "Hello World"
-date: 2026-05-05
-categories: 日记
+date: 2026-05-05 00:00:00 +0800
+categories: [日记]
 ---
 
 这是我的第一篇 Jekyll 博客文章。
