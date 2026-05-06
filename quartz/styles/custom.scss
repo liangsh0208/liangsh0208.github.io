@@ -333,19 +333,19 @@ body .page {
 }
 
 /* ===== Homepage: clean blog feed ===== */
-body[data-slug="index"] .page-header {
+.page-index .page-header {
   display: none;
 }
 
-body[data-slug="index"] .center > article {
+.page-index .center > article {
   display: none;
 }
 
-body[data-slug="index"] .center > hr {
+.page-index .center > hr {
   display: none;
 }
 
-body[data-slug="index"] .recent-notes {
+.page-index .recent-notes {
   margin-top: 1.5rem;
 }
 
@@ -404,10 +404,14 @@ body[data-slug="index"] .recent-notes {
 }
 
 .recent-li .desc-text {
-  margin: 0 0 0.55rem 0;
+  margin: 0 0 0.6rem 0;
   font-size: 0.9rem;
   line-height: 1.65;
   color: var(--gray);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .meta-row {
