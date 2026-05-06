@@ -66,7 +66,7 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.Explorer({
-      folderDefaultState: "collapsed",
+      folderDefaultState: "open",
       folderClickBehavior: "collapse",
       title: "",
     }),
@@ -93,7 +93,7 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.Explorer({
-      folderDefaultState: "collapsed",
+      folderDefaultState: "open",
       folderClickBehavior: "collapse",
       title: "",
     }),
