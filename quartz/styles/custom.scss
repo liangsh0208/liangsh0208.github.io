@@ -256,6 +256,9 @@ body .page {
 .explorer-content a.active {
   color: var(--secondary);
   font-weight: 600;
+  border-left: 2px solid var(--secondary);
+  padding-left: 0.35rem;
+  margin-left: -0.35rem;
 }
 
 /* ===== Right Sidebar (TOC) ===== */
@@ -581,6 +584,14 @@ footer {
 
 :root[saved-theme="dark"] .explorer-content a {
   color: #c9d1d9;
+}
+
+:root[saved-theme="dark"] .explorer-content a.active {
+  color: var(--secondary);
+  font-weight: 600;
+  border-left: 2px solid var(--secondary);
+  padding-left: 0.35rem;
+  margin-left: -0.35rem;
 }
 
 :root[saved-theme="dark"] .folder-outer > ul {
