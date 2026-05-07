@@ -241,6 +241,10 @@ body .page {
   color: #34343c;
   font-weight: 400;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .explorer-content a:hover,
