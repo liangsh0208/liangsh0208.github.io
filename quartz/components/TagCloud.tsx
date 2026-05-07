@@ -1,6 +1,6 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
 import { classNames } from "../util/lang"
-import { pathToRoot } from "../util/path"
+import { pathToRoot, resolveRelative, FullSlug } from "../util/path"
 
 const TagCloud: QuartzComponent = ({
   allFiles,
@@ -38,12 +38,12 @@ const TagCloud: QuartzComponent = ({
 
   return (
     <div class={classNames(displayClass, "tag-cloud")}>
-      <h2 class="tag-cloud-title">话题标签</h2>
+      <h2 class="tag-cloud-title">FEATURED TAGS</h2>
       <ul class="tag-cloud-list">
         {sortedTags.map(([tag, count]) => (
           <li>
             <a
-              href={`${rootPath}tags/${encodeURIComponent(tag)}`}
+              href={resolveRelative(fileData.slug!, `tags/${encodeURIComponent(tag)}` as FullSlug)}
               class="tag-cloud-link"
               style={`font-size: ${fontSize(count)}`}
             >

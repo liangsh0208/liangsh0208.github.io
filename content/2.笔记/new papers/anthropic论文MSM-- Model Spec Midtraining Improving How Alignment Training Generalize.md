@@ -1,3 +1,8 @@
+---
+  tags:
+    - midtrain
+---
+
 
 url: https://www.alphaxiv.org/abs/2605.02087?chatId=019e006e-c831-708b-ab8e-9a91de1039d5
 

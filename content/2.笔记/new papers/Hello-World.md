@@ -1,7 +1,8 @@
 ---
 title: "Hello World"
 date: 2026-05-05
-categories: [日记]
+tags:
+  - 日记
 ---
 
 这是我的第一篇 Jekyll 博客文章。
