@@ -65,6 +65,10 @@ export const defaultContentPageLayout: PageLayout = {
   ],
   right: [
     Component.DesktopOnly(Component.TableOfContents()),
+    Component.ConditionalRender({
+      component: Component.TagCloud(),
+      condition: (page) => page.fileData.slug === "index",
+    }),
   ],
 }
 
