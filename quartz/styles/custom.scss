@@ -233,19 +233,25 @@ body .page {
   border-left: 1px solid #e0e0e0;
 }
 
+/* Sidebar: 统一非高亮颜色，所有文件/文件夹都一样 */
+.explorer-content a,
 .folder-container button span,
-.folder-container div > a,
-.explorer-content a {
+.folder-container div > a {
   font-size: 0.875rem;
   color: #34343c;
   font-weight: 400;
   text-decoration: none;
 }
 
-.folder-container button span:hover,
+.explorer-content a:hover,
 .folder-container div > a:hover,
-.explorer-content a:hover {
+.folder-container button span:hover {
   color: var(--secondary);
+}
+
+/* 覆盖 Quartz explorer.scss 中 folder-container div>a 的蓝色 */
+#quartz-body .folder-container div > a {
+  color: #34343c;
 }
 
 .folder-icon {
@@ -583,6 +589,10 @@ footer {
 }
 
 :root[saved-theme="dark"] .explorer-content a {
+  color: #c9d1d9;
+}
+
+:root[saved-theme="dark"] #quartz-body .folder-container div > a {
   color: #c9d1d9;
 }
 
