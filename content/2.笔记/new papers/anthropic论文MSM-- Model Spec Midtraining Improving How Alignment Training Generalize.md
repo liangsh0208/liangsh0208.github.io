@@ -1,6 +1,7 @@
 ---
-  tags:
-    - midtrain
+tags:
+  - midtrain
+  - anthrotpic
 ---
 
 

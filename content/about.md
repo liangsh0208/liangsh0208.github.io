@@ -10,4 +10,6 @@ permalink: /about/
 
 email： liangshihao_0208@163.com
 
-![[Pasted image 20260506192213.png|263]]
+github: https://github.com/liangsh0208
+
+知乎： https://www.zhihu.com/people/xiao-yu-10-34-49

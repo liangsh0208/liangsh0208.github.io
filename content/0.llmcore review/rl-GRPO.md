@@ -1,3 +1,9 @@
+---
+tags:
+  - RL算法
+---
+
+
 
 paper: 
 DeepSeekMath:  https://www.alphaxiv.org/abs/2402.03300
