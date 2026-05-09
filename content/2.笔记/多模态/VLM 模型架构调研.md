@@ -27,7 +27,7 @@ CLIP 则采用**自然语言**作为监督信号：
 
 
 ### 模型设计架构
-![](附件/Pasted%20image%2020260509140822.png)
+![](Pasted%20image%2020260509140822.png)
 架构包含两个主要编码器：一个**图像编码器（Image Encoder）**（如 ResNet 或 ViT）和一个**文本编码器（Text Encoder）**（Transformer）。
 
 > 对比预训练（Contrastive Pre-training）
@@ -41,7 +41,7 @@ CLIP 则采用**自然语言**作为监督信号：
 
 
 模型实现伪代码：
-![473](附件/Pasted%20image%2020260509141218.png)
+![473](Pasted%20image%2020260509141218.png)
 
 ### 下游应用方法
 #### 零样本迁移模式 (无需微调，最推荐)
@@ -75,9 +75,9 @@ paper: https://www.alphaxiv.org/abs/2204.14198
 
 
 
-![](附件/Pasted%20image%2020260509142416.png)
+![](Pasted%20image%2020260509142416.png)
 
-![](附件/Pasted%20image%2020260509143249.png)
+![](Pasted%20image%2020260509143249.png)
 
 <alphaxiv-thinking-title title="Analyzing Flamingo architecture components" />Flamingo 是一种视觉语言模型 (VLM) 家族，其核心设计理念是通过创新的架构组件将预训练且**冻结**的视觉编码器与语言模型连接起来。这种设计使其能够处理交错的图像、视频和文本序列，并具备强大的少样本 (few-shot) 学习能力。
 
@@ -129,7 +129,7 @@ Flamingo 提供了三种不同规模的版本，主要区别在于冻结的语�
 
 
 
-![](附件/Pasted%20image%2020260509143205.png)
+![](Pasted%20image%2020260509143205.png)
 
 
 ## BLIP-2
@@ -137,19 +137,19 @@ paper: https://www.alphaxiv.org/abs/2301.12597?chatId=019e0b71-eee3-715e-8b52-7c
 
 论文中模型架构的示意图，方便直接理解。
 
-![469](附件/Pasted%20image%2020260509143712.png)
+![469](Pasted%20image%2020260509143712.png)
 
 ### - Qformer的模型架构
 - 主要是用于 image encoder 与 LLM 的映射器。
-![](附件/Pasted%20image%2020260509143816.png)
+![](Pasted%20image%2020260509143816.png)
 
 
 - 编码后的图像embedding 如何插入到LLM 继续
-![](附件/Pasted%20image%2020260509143854.png)
+![](Pasted%20image%2020260509143854.png)
 
 
 ### - 论文中的VQA finetune架构
-![479](附件/Pasted%20image%2020260509144005.png)
+![479](Pasted%20image%2020260509144005.png)
 
 
 ## LLAVA
@@ -160,7 +160,7 @@ paper: https://www.alphaxiv.org/abs/2304.08485
 
 - 模型架构： 基于CLIP 做图像编码，然后过一个MLP 映射层，拼接 文本 token 输入LLM 做生成。
 
-![](附件/Pasted%20image%2020260509145646.png)
+![](Pasted%20image%2020260509145646.png)
 
 
 基于大模型做了个总结：
@@ -241,7 +241,7 @@ LLaVA 证明了**视觉指令微调**是提升大型多模态模型通用能力�
 paper: https://www.alphaxiv.org/abs/2511.21631
 
 
-![](附件/Pasted%20image%2020260509152930.png)
+![](Pasted%20image%2020260509152930.png)
 
 - 基于大模型做个总结，主要是了解模型结构即可。 具体细节后续再补。
 <alphaxiv-thinking-title title="Fetching more paper details" />
@@ -353,3 +353,215 @@ DeepStack 是本版本最重要的架构创新之一。不同于原始 DeepStack
 ### 五、训练优化：平方根重权化
 
 在优化层面，模型从**按样本平均损失**改为**按 token 的平方根归一化损失**。这一方法更好地平衡了纯文本数据和多模态数据的训练贡献，在提升多模态性能的同时不会损害语言能力。 [Loss Reweighting](https://alphaxiv.org/abs/2511.21631v2?page=1)
+
+
+
+
+## kimi-vl
+
+paper: https://www.alphaxiv.org/abs/2504.07491
+
+![](Pasted%20image%2020260509161544.png)
+
+
+
+## Kimi-VL 模型架构详解
+
+Kimi-VL 的架构由三个核心部分组成：**原生分辨率视觉编码器（MoonViT）**、**MLP 投影层**，以及**混合专家（MoE）语言模型**。
+
+---
+
+### 1. MoonViT：原生分辨率视觉编码器
+
+MoonViT 是 Kimi-VL 最具创新性的组件之一，其核心目标是**原生处理任意分辨率的图像**，无需传统的图像裁剪拼接操作（如 LLaVA-OneVision 所采用的方式）。
+
+**关键设计：**
+- **图像打包（Packing）**：借鉴 NaViT 的方法，将图像分割为 patch，展平后顺序拼接成一维序列，从而支持同一批次中不同分辨率图像的混合处理。
+- **位置编码**：采用双重位置编码策略——
+  - 从 SigLIP-SO-400M 继承的**可学习固定尺寸绝对位置嵌入**（经插值保留原有能力）
+  - 额外引入沿高度和宽度维度的 **2D RoPE**，增强高分辨率图像的精细位置感知
+- **注意力机制**：与语言模型共享相同的计算算子，支持 FlashAttention 的变长序列注意力机制，保证不同分辨率图像下训练吞吐量不受损
+- **参数规模**：约 400M 参数，初始化自 SigLIP-SO-400M
+
+> "We incorporate the packing method from NaViT, where images are divided into patches, flattened, and sequentially concatenated into 1D sequences." [MoonViT Design](https://alphaxiv.org/abs/2504.07491?page=3)
+
+在 Kimi-VL-A3B-Thinking-2506 中，MoonViT 进一步被继续训练，最大支持单张图像 **320 万像素**输入（是原始限制的 4 倍），大幅提升高分辨率感知能力。
+
+---
+
+### 2. MLP 投影层
+
+MLP 投影层负责**连接视觉编码器与语言模型**，结构简洁高效：
+
+1. **Pixel Shuffle 操作**：对 MoonViT 输出的图像特征进行空间压缩——在空间维度做 $2\times2$ 下采样，同时将通道维度相应扩展
+2. **两层 MLP**：将 pixel shuffle 后的特征投影到语言模型的嵌入维度
+
+这一设计在降低视觉 token 数量（减少计算开销）的同时保留了足够的视觉信息。
+
+---
+
+### 3. MoE 语言模型（Moonlight）
+
+语言解码器采用 Kimi 自研的 **Moonlight MoE 模型**，架构类似于 DeepSeek-V3。
+
+| 属性 | 数值 |
+|------|------|
+| 激活参数量 | **2.8B** |
+| 总参数量 | **16B** |
+| 上下文窗口 | **128K tokens** |
+| MoE 结构 | 共享专家 + 非共享专家 + 路由器 |
+
+**MoE 结构特点：**
+- 每个 MoE FFN 层由**共享专家**（Shared Experts）和**非共享专家**（Non-shared Experts）组成，通过路由器动态选择激活哪些专家
+- 仅激活 2.8B 参数即可处理推理，实现了参数效率与模型容量之间的平衡
+
+> "The language model of Kimi-VL utilizes our Moonlight model, an MoE language model with 2.8B activated parameters, 16B total parameters, and an architecture similar to DeepSeek-V3." [MoE LLM](https://alphaxiv.org/abs/2504.07491?page=4)
+
+---
+
+### 4. 优化器：增强版 Muon
+
+整个训练过程（包括视觉编码器、投影层、语言模型）统一使用**增强版 Muon 优化器**：
+- 在原始 Muon 基础上加入了**权重衰减**，并精细调整了每参数的更新尺度
+- 采用 **ZeRO-1** 策略进行分布式实现，优化内存效率并降低通信开销
+
+---
+
+### 架构总结
+
+```
+输入图像（任意分辨率）
+      ↓
+   MoonViT（400M）
+   原生分辨率编码 + 2D RoPE
+      ↓
+   MLP 投影层
+   Pixel Shuffle + 2层MLP
+      ↓
+   Moonlight MoE LLM（2.8B激活 / 16B总量）
+   128K上下文 + 共享/非共享专家
+      ↓
+   文本输出
+```
+
+这一架构设计的核心优势在于：以极低的激活参数量（仅 ~3B），同时覆盖高分辨率视觉感知、长上下文理解和复杂推理等能力。[Architecture Overview](https://alphaxiv.org/abs/2504.07491?page=3)
+
+
+> 训练策略。
+> ## Kimi-VL 训练流程详解
+
+整体训练分为**预训练**和**后训练**两大阶段，合计消耗约 4.4T tokens（不含初始纯文本预训练）。
+
+---
+
+## 一、预训练阶段
+
+### Stage 1：ViT 独立训练（2T + 0.1T tokens）
+
+MoonViT 先独立训练，数据包括图文对（alt text、合成描述、grounding bbox、OCR文本），采用双重训练目标：
+
+$$L = L_{\text{siglip}} + \lambda L_{\text{caption}}, \quad \lambda = 2$$
+
+- $L_{\text{siglip}}$：对比损失（SigLIP变体）
+- $L_{\text{caption}}$：条件于图像特征的下一token预测损失
+
+训练完 2T tokens 后，额外用 0.1T tokens 将 MoonViT **对齐到 MoE 语言模型**（仅更新 MoonViT 和 MLP 投影层），显著降低初始困惑度，为后续联合训练铺路。[ViT Training](https://alphaxiv.org/abs/2504.07491?page=5)
+
+---
+
+### Stage 2：联合预训练（1.4T tokens）
+
+语言模型从已处理 5.2T tokens 的 Moonlight 检查点加载，与 MoonViT 一起联合训练：
+- 初始阶段仅使用纯文本数据，随后**逐渐提升多模态数据比例**
+- 多模态数据涵盖：图文描述、交错数据、OCR、知识、视频、Agent 数据六大类
+- 通过渐进式策略，保留语言能力的同时整合视觉理解能力
+
+---
+
+### Stage 3：联合冷却训练（0.6T tokens）
+
+使用**高质量**语言和多模态数据进行精炼：
+
+- **语言侧**：高质量预训练语料子集 + 合成数学/代码 QA 对（通过拒绝采样过滤）
+- **多模态侧**：学术视觉数据转 QA 对 + 高质量子集回放
+- QA 对占比刻意控制在**较低比例**，避免过拟合特定问答模式
+
+> "Unlike post-training stages, these language and multimodal QA pairs in the cooldown stage are only included for activating specific abilities and henceforth facilitating learning high-quality data, thus, we keep their ratio at a low portion to avoid overfitting these QA patterns." [Cooldown Strategy](https://alphaxiv.org/abs/2504.07491?page=5)
+
+---
+
+### Stage 4：联合长上下文激活（0.3T tokens）
+
+将上下文长度从 **8K 扩展至 128K**，RoPE 基频从 50,000 重置为 800,000，分两个子阶段各扩展 4 倍：
+
+- 长数据占比提升至 **25%**，其余 75% 回放短数据以防止遗忘
+- 长数据类型：长文本 + 长交错数据 + 长视频 + 长文档
+- 最终在文本和视频 Needle-in-a-Haystack 测试中，128K 范围内均达到高召回率
+
+---
+
+## 二、后训练阶段
+
+### Stage 5：联合监督微调 SFT
+
+使用指令数据对基础模型进行微调，采用 ChatML 格式：
+
+| 子阶段 | 序列长度 | 学习率 |
+|--------|----------|--------|
+| 第一轮 | 32K | $2\times10^{-5}$ → $2\times10^{-6}$ |
+| 第二轮 | 128K | re-warmup 至 $1\times10^{-5}$ → $1\times10^{-6}$ |
+
+- 监督信号**仅施加于回答部分和特殊 token**，系统/用户提示被 mask
+- 通过 format-aware packing 将多个样本打包进单个序列以提升训练效率
+
+---
+
+### Stage 6：长链思维 SFT（Long-CoT SFT）
+
+为激活深度推理能力，构建高质量长 CoT 热身数据集：
+- 通过提示工程（类似拒绝采样）从 **Kimi k1.5** 采样多条推理路径，过滤错误路径
+- 数据刻意涵盖四类认知过程：
+  - **Planning**（系统规划步骤）
+  - **Evaluation**（评估中间步骤）
+  - **Reflection**（反思与修正）
+  - **Exploration**（探索替代方案）
+
+---
+
+### Stage 7：强化学习（RL）
+
+采用**在线策略镜像下降**变体作为 RL 算法，优化目标为：
+
+$$\max_\theta \mathbb{E}_{(x,y^*)\sim D}\left[\mathbb{E}_{(y,z)\sim\pi_\theta}[r(x,y,y^*)] - \tau \text{KL}(\pi_\theta(x) \| \pi_{\theta_i}(x))\right]$$
+
+- 奖励函数 $r \in \{0, 1\}$ 基于答案正确性（规则判断）
+- $\tau$ 控制 KL 正则化强度，防止策略更新过激
+
+**关键训练技巧：**
+- **长度惩罚**：对过长回答施加奖励惩罚，缓解"过度思考"问题
+- **课程采样（Curriculum Sampling）**：根据难度标签聚焦高价值样本
+- **优先采样（Prioritized Sampling）**：根据每个实例的历史成功率动态调整训练优先级
+
+> "We implement a length-based reward to penalize excessively long responses, mitigating the overthinking problem where the model generates redundant reasoning chains." [RL Length Penalty](https://alphaxiv.org/abs/2504.07491?page=7)
+
+---
+
+## 训练流程总览
+
+```
+纯文本预训练（5.2T）
+        ↓
+ViT 独立训练（2T + 0.1T对齐）
+        ↓
+联合预训练（1.4T）
+        ↓
+联合冷却训练（0.6T）
+        ↓
+联合长上下文激活（0.3T）
+        ↓
+联合 SFT（32K + 128K两阶段）→ Kimi-VL-A3B-Instruct
+        ↓
+长 CoT SFT + 强化学习 → Kimi-VL-A3B-Thinking / Thinking-2506
+```
+
+整个训练设计的核心理念是**始终保持联合训练**（语言+多模态同步训练），避免引入多模态能力的同时损失纯文本能力。[Training Philosophy](https://alphaxiv.org/abs/2504.07491?page=4)
