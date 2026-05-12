@@ -1,4 +1,5 @@
 
+
 # VLM 模型架构
 
 一个标准的VLM由三个紧密协作的模块构成[](https://developer.aliyun.com/article/1693391)[](https://developer.aliyun.com/article/1682879)：
