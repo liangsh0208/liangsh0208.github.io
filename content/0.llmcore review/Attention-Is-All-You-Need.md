@@ -9,8 +9,8 @@ paper 地址： https://arxiv.org/pdf/1706.03762
 - 复习基础的transformer 结构和最原始的实现公式算法。
 
 ## transformer 架构。
-![[附件/Pasted image 20260505230935.png]]
-![[附件/Pasted image 20260506160425.png]]
+![[Appendix/Pasted image 20260505230935.png]]
+![[Appendix/Pasted image 20260506160425.png]]
 设计动机： 在 Transformer 之前，序列建模的主流方案是 RNN/LSTM。它们有两个根本缺陷：
 
 - **无法并行**：隐状态 $h_t$ 依赖 $h_{t-1}$，必须逐步计算
@@ -37,7 +37,7 @@ PE_{(pos,2i+1)} = \cos\!\left(\frac{pos}{10000^{2i/d_{\text{model}}}}\right)
 $$
 
 选择正弦/余弦函数的原因：对任意固定偏移 $k$，$PE_{pos+k}$ 可表示为 $PE_{pos}$ 的线性函数，让模型易于学习**相对位置**关系。实验也表明，可学习位置编码与此结果几乎相同（25.7 vs 25.8 BLEU），但正弦版本理论上可外推到训练时未见过的更长序列。
-![[附件/Pasted image 20260506155435.png]]
+![[Appendix/Pasted image 20260506155435.png]]
 
 
 ## attention
@@ -50,7 +50,7 @@ $$
 $$
 
 除以 $\sqrt{d_k}$ 是关键设计：当 $d_k$ 较大时，点积结果会很大，将 softmax 推入梯度极小的区域，缩放可有效缓解这一问题
-![[附件/Pasted image 20260505231320.png]]
+![[Appendix/Pasted image 20260505231320.png]]
 
 llama的实现比较贴近原始论文： src/transformers/models/llama/modeling_llama.py
 
@@ -126,7 +126,7 @@ class LlamaAttention(nn.Module):
 
 
 ###  MHA
-![[附件/Pasted image 20260506110357.png]]
+![[Appendix/Pasted image 20260506110357.png]]
 与其用一个注意力函数处理全维度，不如将 $Q, K, V$ 分别投影到 $h$ 个低维子空间，并行计算注意力后拼接：
 
 $$  
@@ -137,12 +137,12 @@ $$
 
 
 - 下面是注意力以及多头的示意图：
-![[附件/Pasted image 20260506154204.png]]
+![[Appendix/Pasted image 20260506154204.png]]
 
 ## FFN
 - 不过现在的模型，基本上已经转换为gelu的实现算法。
 - 
-![[附件/Pasted image 20260506154309.png]]
+![[Appendix/Pasted image 20260506154309.png]]
 
 gelu 示例代码
 ```python
@@ -199,4 +199,4 @@ $$
 
 ## 附件
 ### 注意力具象化
-![[附件/Pasted image 20260506161406.png]]
+![[Appendix/Pasted image 20260506161406.png]]

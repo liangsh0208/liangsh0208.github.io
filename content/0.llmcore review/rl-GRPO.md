@@ -29,8 +29,8 @@ $$J_{PPO}(\theta) = \mathbb{E}_{q \sim P(Q), o \sim \pi_{\theta_{old}}(O|q)} \fr
 
 - **显存与计算负担大**：Critic 模型通常和 Actor 一样大，显存开销翻倍；
 - **逐 token 价值估计困难**：在数学推理等任务中，通常只有**最后一个 token** 能获得奖励模型的标量反馈，导致训练一个准确的逐 token 价值函数很困难。
-![[附件/Pasted image 20260507112311.png]]
-![[附件/Pasted image 20260507112551.png]]
+![[Appendix/Pasted image 20260507112311.png]]
+![[Appendix/Pasted image 20260507112551.png]]
 - 上面截图是原始论文中的PPO 公式算法。 其中比较复杂的还是GAE 的计算。  GAE 的详细计算逻辑可以参考 PPO 原始paper： https://www.alphaxiv.org/abs/1707.06347 后边单独加一个章节解释一下。 
 - reward 计算之后，一般的实现会再加一个KL 散度的抑制。防止模型更新太大。 GRPO 的实现把KL 散度放到了 优势函数计算的外部。
 
@@ -46,7 +46,7 @@ GRPO 的关键改进如图 4 所示：
 
 对于每个问题 $q$，GRPO 从旧策略 $\pi_{\theta_{old}}$ 中**采样一组输出** $\{o_1, o_2, \cdots, o_G\}$，然后用这 $G$ 个输出的**相对奖励**来计算优势，替代 Critic 模型提供的基线。
 
-![[附件/Pasted image 20260507112335.png]]
+![[Appendix/Pasted image 20260507112335.png]]
 
 ---
 
@@ -71,7 +71,7 @@ KL 散度使用如下无偏估计器：
 
 $$D_{KL}(\pi_\theta || \pi_{ref}) = \frac{\pi_{ref}(o_{i,t}|q,o_{i,<t})}{\pi_\theta(o_{i,t}|q,o_{i,<t})} - \log \frac{\pi_{ref}(o_{i,t}|q,o_{i,<t})}{\pi_\theta(o_{i,t}|q,o_{i,<t})} - 1$$
 
-![[附件/Pasted image 20260507112453.png]]
+![[Appendix/Pasted image 20260507112453.png]]
 
 
 ---
@@ -126,7 +126,7 @@ $$\hat{A}_{i,t} = \sum_{index(j) \geq t} \tilde{r}_{index(j)}^{(i)}$$
 不是从头重新训练 reward model，而是使用 **replay mechanism**：每次更新时混入 **10% 的历史数据**，再叠加新采样的数据一起训练。这样既能适应新分布，又不会遗忘之前学过的判断标准。
 
 
-![[附件/Pasted image 20260507123119.png]]
+![[Appendix/Pasted image 20260507123119.png]]
 ---
 
 ## 6. 与 PPO 的对比总结
@@ -160,9 +160,9 @@ $$GC_{GRPO}(q, o, t, \pi_{ref}) = \hat{A}_{i,t} + \beta \left( \frac{\pi_{ref}(o
 
 ppo: https://www.alphaxiv.org/abs/1707.06347?chatId=019e007a-45a6-7392-bc4d-d97db2df92c0
 - 原始论文计算公式
-![[附件/Pasted image 20260507124340.png]]
+![[Appendix/Pasted image 20260507124340.png]]
 
-![[附件/Pasted image 20260507123340.png]]
+![[Appendix/Pasted image 20260507123340.png]]
 
 
 
@@ -229,9 +229,9 @@ $$
 
 
 PPO 完整损失：
-![[附件/Pasted image 20260507124033.png]]
+![[Appendix/Pasted image 20260507124033.png]]
 
 - 下面这块更容易理解：
 
 
-![[附件/Pasted image 20260507124202.png]]
+![[Appendix/Pasted image 20260507124202.png]]
