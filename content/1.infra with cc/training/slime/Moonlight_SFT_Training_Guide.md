@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Moonlight SFT 操作流程与性能优化分析
 
 > 本文档详细分析 Moonlight 模型在 Slime 框架中进行 SFT (Supervised Fine-Tuning) 训练的操作流程、核心实现以及性能优化策略

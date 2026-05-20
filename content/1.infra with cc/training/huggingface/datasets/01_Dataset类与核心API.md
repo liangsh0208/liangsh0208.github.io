@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Dataset 类与核心 API
 
 > **【文档定位】** Dataset 核心类的 API 设计与使用方法

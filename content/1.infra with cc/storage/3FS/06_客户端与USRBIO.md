@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 客户端与 USRBIO：FUSE 与零拷贝异步 I/O
 
 > 源码路径：`src/fuse/`、`src/lib/api/`、`hf3fs/`  

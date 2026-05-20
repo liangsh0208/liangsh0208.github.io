@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Nanotron 配置系统与 Config 详解
 
 > 【源码定位】`src/nanotron/config/` 目录 | `config.py` 主配置文件 | `parallelism_config.py` 并行配置 | `models_config.py` 模型配置

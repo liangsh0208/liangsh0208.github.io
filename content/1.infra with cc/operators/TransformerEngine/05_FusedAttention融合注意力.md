@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Fused Attention 融合注意力
 
 > 源码路径：`transformer_engine/common/fused_attn/`  

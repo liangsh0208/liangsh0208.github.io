@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Slime Checkpoint 模块实现原理与性能优化
 
 > **【源码定位】** `slime/backends/megatron_utils/checkpoint.py`, `slime/backends/megatron_utils/model.py`  

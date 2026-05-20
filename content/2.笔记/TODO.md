@@ -1,3 +1,7 @@
+---
+created: 2026-05-19
+---
+
 
 - VLA 【vision language action】
 - 世界模型 world models

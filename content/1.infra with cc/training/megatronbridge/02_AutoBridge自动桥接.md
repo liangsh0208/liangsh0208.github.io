@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # AutoBridge 自动桥接系统
 
 > 本文档详细分析 AutoBridge 自动桥接系统，讲解 HuggingFace 模型的自动检测、双向转换和在线加载机制。

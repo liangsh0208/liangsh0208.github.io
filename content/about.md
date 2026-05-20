@@ -1,4 +1,5 @@
 ---
+created: 2026-05-06
 layout: page
 title: 关于我
 permalink: /about/

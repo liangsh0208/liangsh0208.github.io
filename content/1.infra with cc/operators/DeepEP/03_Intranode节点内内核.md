@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 03 Intranode 节点内内核
 
 > 源文件：`csrc/kernels/intranode.cu`、`csrc/kernels/buffer.cuh`、`csrc/kernels/utils.cuh`

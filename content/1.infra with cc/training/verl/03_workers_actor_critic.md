@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Actor / Critic Worker 模块
 
 **路径**：`verl/workers/actor/`、`verl/workers/critic/`

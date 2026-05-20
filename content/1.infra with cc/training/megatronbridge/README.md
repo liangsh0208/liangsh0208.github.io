@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Megatron-Bridge 模块文档索引
 
 > 本系列文档深入分析 Megatron-Bridge 的核心模块，涵盖 Bridge 模式、模型转换、训练框架、配置系统、PEFT 微调、数据处理、检查点系统和训练配方。

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 训练引擎（Engine）模块
 
 **路径**：`verl/workers/engine/`

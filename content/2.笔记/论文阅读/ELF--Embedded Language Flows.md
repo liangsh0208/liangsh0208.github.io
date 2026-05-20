@@ -1,3 +1,7 @@
+---
+created: 2026-05-19
+---
+
 
 paper： https://www.alphaxiv.org/abs/2605.10938?chatId=019e29b0-36ac-7ee3-8077-27c72a0b50c0
 

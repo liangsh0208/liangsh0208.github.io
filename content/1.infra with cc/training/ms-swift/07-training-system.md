@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift 训练系统：基础训练器与 Mixin 架构
 
 ms-swift 的训练系统不从零构建 Trainer，而是在 HuggingFace `transformers.Trainer` 和 `trl` 基类之上，通过 **Mixin 多重继承** 注入框架特有的公共能力。这种设计使得标准 SFT、预训练、Embedding、Reranker 以及各类 RLHF 算法都能共享同一套基础设施。

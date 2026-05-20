@@ -1,3 +1,7 @@
+---
+created: 2026-05-12
+---
+
 
 在强化学习（RL）特别是大规模语言模型（LLM）的后训练阶段（如 PPO、GRPO），**策略熵（Policy Entropy）** 是衡量模型探索（Exploration）与利用（Exploitation）平衡的关键指标。
 

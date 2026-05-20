@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # PyTorch 模块层
 
 > 源码路径：`transformer_engine/pytorch/module/`  

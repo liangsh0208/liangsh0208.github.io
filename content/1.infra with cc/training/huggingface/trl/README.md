@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # TRL (Transformers Reinforcement Learning) 架构文档
 
 本目录包含 TRL 库的深度架构分析文档，按模块组织为细粒度子文档。

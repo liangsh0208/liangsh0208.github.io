@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Megatron-LM 完整技术文档系列
 
 > 基于 NVIDIA Megatron-LM 代码仓库的深度技术解析

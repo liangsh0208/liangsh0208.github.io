@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift 推理与部署：多后端引擎架构
 
 ms-swift 支持多种推理加速引擎，通过统一的抽象层屏蔽后端差异，使同一份模型和模板代码可在 transformers、vLLM、SGLang、LMDeploy 之间无缝切换。部署层面提供 OpenAI-Compatible 的 FastAPI 服务。

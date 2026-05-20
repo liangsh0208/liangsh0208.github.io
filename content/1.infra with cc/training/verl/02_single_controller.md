@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Single Controller 模块
 
 **路径**：`verl/single_controller/`

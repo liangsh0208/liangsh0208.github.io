@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Megatron-LM Transformer层实现
 
 > 【源码定位】|【阅读建议】|【前置知识】

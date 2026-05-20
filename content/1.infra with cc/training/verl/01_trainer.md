@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Trainer 模块
 
 **路径**：`verl/trainer/`

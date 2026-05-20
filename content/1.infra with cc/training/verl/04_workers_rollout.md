@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Rollout Worker 模块
 
 **路径**：`verl/workers/rollout/`

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # ModelProvider 模式
 
 > 本文档详细分析 ModelProvider 模式，讲解分布式模型的实例化、Hook 系统和并行策略配置。

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # TransformerEngine 详解
 
 > NVIDIA TransformerEngine — 面向大模型训练与推理的低精度加速库  

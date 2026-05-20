@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 04_大模型加载与Hook系统
 
 > **【源码定位】** `/Users/danchen/Documents/1.RL_fw/huggingface/accelerate/src/accelerate/big_modeling.py`, `hooks.py`

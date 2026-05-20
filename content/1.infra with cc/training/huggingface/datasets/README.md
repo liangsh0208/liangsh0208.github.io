@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # HuggingFace Datasets 架构文档导航
 
 > **【文档定位】** datasets 库细粒度架构文档目录

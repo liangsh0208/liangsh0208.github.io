@@ -1,3 +1,7 @@
+---
+created: 2026-05-12
+---
+
 地址; https://www.alphaxiv.org/abs/2605.05365?chatId=019e1a0f-d0f8-76ee-9737-ebe347e1e3e4
 
 

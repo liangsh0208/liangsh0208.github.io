@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 05_DeepSpeed与FSDP集成
 
 > **【源码定位】** `/Users/danchen/Documents/1.RL_fw/huggingface/accelerate/src/accelerate/utils/deepspeed.py`, `utils/fsdp_utils.py`

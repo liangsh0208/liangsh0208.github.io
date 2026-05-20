@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Python 接口层
 
 > 源码路径：`flash_mla/__init__.py`  

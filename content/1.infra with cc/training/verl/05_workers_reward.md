@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Reward Manager 模块
 
 **路径**：`verl/workers/reward_manager/`、`verl/utils/reward_score/`

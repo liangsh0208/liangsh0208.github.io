@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 存储服务（Storage）：CRAQ 协议与数据恢复
 
 > 源码路径：`src/storage/`  

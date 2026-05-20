@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # Transformers 训练全流程解析
 
 ms-swift 基于 HuggingFace `transformers` 的训练流程是其最核心的执行路径，覆盖 SFT、Pretrain、RLHF 等几乎所有任务。本文档从 CLI 入口逐层拆解到 Trainer 训练循环，梳理完整的数据流和调用链。

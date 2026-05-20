@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # HuggingFace Tokenizers 架构文档
 
 本目录包含HuggingFace Tokenizers库的细粒度架构文档，从源码层面深入解析分词器的实现原理。

@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift 项目架构全景
 
 > **版本**: ms-swift v4.x (main branch)  

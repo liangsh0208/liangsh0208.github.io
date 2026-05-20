@@ -1,3 +1,10 @@
+---
+created: 2026-05-12
+tags:
+  - RL算法
+---
+
+
 Direct Preference Optimization: Your Language Model is Secretly a Reward Model
 paper: https://www.alphaxiv.org/abs/2305.18290
 

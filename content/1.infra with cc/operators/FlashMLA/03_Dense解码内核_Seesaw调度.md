@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Dense 解码内核：Seesaw 调度
 
 > 源码路径：`csrc/sm90/decode/dense/`  

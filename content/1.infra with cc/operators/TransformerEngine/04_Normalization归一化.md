@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Normalization 归一化
 
 > 源码路径：`transformer_engine/common/normalization/`  

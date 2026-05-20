@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # picotron 架构文档
 
 > **源码位置**: `/Users/danchen/Documents/1.RL_fw/huggingface/picotron`  

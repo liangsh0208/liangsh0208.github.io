@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # RDMA 网络层：IBSocket 与零拷贝传输
 
 > 源码路径：`src/common/net/`  

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 04 Internode 跨节点内核
 
 > 源文件：`csrc/kernels/internode.cu`、`csrc/kernels/ibgda_device.cuh`、`csrc/kernels/runtime.cu`

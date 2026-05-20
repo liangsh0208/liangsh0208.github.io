@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # FP8 稀疏解码内核：Crossover 技术
 
 > 源码路径：`csrc/sm90/decode/sparse_fp8/`  

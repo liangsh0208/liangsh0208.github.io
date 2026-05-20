@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Slime Infrastructure 分析文档
 
 > 分析路径: `/Users/danchen/Documents/RL_fw/slime/slime`

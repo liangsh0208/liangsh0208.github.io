@@ -1,3 +1,10 @@
+---
+created: 2026-05-12
+tags:
+  - LLM基础
+---
+
+
 参考blog: https://zhuanlan.zhihu.com/p/18056041194
 
 MTP方法，是优化训练和推理效率的一个分支系列。

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 01_Accelerator核心API
 
 > **【源码定位】** `/Users/danchen/Documents/1.RL_fw/huggingface/accelerate/src/accelerate/accelerator.py`

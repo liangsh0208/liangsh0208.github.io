@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Nanotron Checkpoint 与序列化
 
 ## 1. 顶部信息栏

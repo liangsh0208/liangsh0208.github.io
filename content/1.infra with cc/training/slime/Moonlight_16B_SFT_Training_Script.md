@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Moonlight-16B-A3B SFT 训练脚本
 
 ## 训练环境

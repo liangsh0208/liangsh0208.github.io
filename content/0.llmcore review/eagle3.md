@@ -1,3 +1,10 @@
+---
+created: 2026-05-19
+tags:
+  - LLM基础
+---
+
+
 eagle 系列也是 MTP 的一个具体实现。 可以参考这个链接的文章。[MTP-Multi-Token Prediction](MTP-Multi-Token%20Prediction.md)
 
 

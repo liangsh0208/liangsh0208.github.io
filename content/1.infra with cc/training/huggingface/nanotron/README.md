@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Nanotron 技术文档系列
 
 > Nanotron 是 HuggingFace 开发的轻量级大规模语言模型预训练框架，支持 3D 并行（TP/PP/DP）。

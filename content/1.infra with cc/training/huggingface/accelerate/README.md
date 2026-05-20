@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # HuggingFace Accelerate 架构文档集
 
 > 本目录包含 Accelerate 库的细粒度技术文档，由原始文档 `accelerate_架构分析.md` 重构而来。

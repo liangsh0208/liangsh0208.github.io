@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 02 Layout 布局计算
 
 > 源文件：`csrc/kernels/layout.cu`、`deep_ep/buffer.py` (get_dispatch_layout)

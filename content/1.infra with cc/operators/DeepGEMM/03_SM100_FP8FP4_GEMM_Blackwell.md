@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # SM100 FP8/FP4 GEMM（Blackwell）
 
 > 源码路径：  

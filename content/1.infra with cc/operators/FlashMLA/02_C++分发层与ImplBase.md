@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # C++ 分发层与 ImplBase 架构
 
 > 源码路径：`csrc/api/`  

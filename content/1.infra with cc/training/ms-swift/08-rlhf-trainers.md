@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift RLHF 训练器：对齐算法实现
 
 ms-swift 内置了丰富的偏好对齐训练算法，从经典的 DPO/PPO 到最新的 GRPO 家族（DAPO/GSPO/SAPO/CISPO 等）。所有 RLHF Trainer 继承自 `trl` 基类并通过 `SwiftMixin` + `RLHFTrainerMixin` 注入框架能力。

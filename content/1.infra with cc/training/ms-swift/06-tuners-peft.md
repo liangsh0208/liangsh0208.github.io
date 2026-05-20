@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift PEFT/Tuners：参数高效微调方法实现
 
 ms-swift 实现了多种轻量微调方法，同时通过桥接层复用 HuggingFace `peft` 库的成熟实现。本文档解析 `SwiftModel` 统一包装器、各类 tuner 的实现细节、以及训练管道中的集成方式。

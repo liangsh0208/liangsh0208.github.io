@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # ms-swift 模型系统：注册、加载与架构映射
 
 模型系统是 ms-swift 承上启下的核心层：向下对接 HuggingFace `transformers` 生态，向上为 Template、Tuner、Trainer 提供统一且带元信息的模型实例。它不重新实现 Transformer 架构，而是通过一套 **元数据驱动的注册-加载-补丁机制** 来适配 1000+ 模型。

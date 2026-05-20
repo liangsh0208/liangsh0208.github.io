@@ -1,3 +1,7 @@
+---
+created: 2026-05-09
+---
+
 # Megatron-SWIFT 训练全流程
 
 Megatron-SWIFT 是 ms-swift 中独立的**大规模分布式训练子系统**，通过 `mcore-bridge` 桥接将 HuggingFace transformers 模型格式转换为 Megatron-LM 的并行格式。它使用独立的 CLI 入口 `megatron`，目标是让用户在使用 Megatron 并行（TP/PP/SP/CP/EP/VPP）时获得与 transformers 路径一致的开发体验。

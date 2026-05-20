@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 01 Buffer 通信缓冲区
 
 > 源文件：`deep_ep/buffer.py`、`csrc/deep_ep.hpp`、`csrc/deep_ep.cpp`、`csrc/config.hpp`、`csrc/event.hpp`

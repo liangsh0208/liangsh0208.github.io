@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # 03_分布式训练与Parallel
 
 > **【源码定位】** `/Users/danchen/Documents/1.RL_fw/huggingface/accelerate/src/accelerate/utils/operations.py`

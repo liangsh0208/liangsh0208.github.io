@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # JAX 前端与 MoE 支持
 
 > JAX 前端源码：`transformer_engine/jax/`  

@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # GEMM 矩阵乘法
 
 > 源码路径：`transformer_engine/common/gemm/`  

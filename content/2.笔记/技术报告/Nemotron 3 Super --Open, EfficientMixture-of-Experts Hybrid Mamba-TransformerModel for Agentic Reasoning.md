@@ -1,3 +1,7 @@
+---
+created: 2026-05-12
+---
+
 
 paper: https://arxiv.org/pdf/2604.12374
 

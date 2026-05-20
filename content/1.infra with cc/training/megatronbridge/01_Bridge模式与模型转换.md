@@ -1,3 +1,7 @@
+---
+created: 2026-05-06
+---
+
 # Bridge 模式与模型转换
 
 > 本文档深入分析 Megatron-Bridge 的核心 Bridge 模式，详细讲解 Hugging Face 和 Megatron-Core 之间的模型转换机制。
