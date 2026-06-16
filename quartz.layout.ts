@@ -7,9 +7,28 @@ export const sharedPageComponents: SharedLayout = {
   header: [],
   afterBody: [
     Component.ConditionalRender({
+      component: Component.Graph({
+        localGraph: undefined,
+        globalGraph: {
+          drag: true,
+          zoom: true,
+          depth: -1,
+          scale: 0.9,
+          repelForce: 0.2,
+          centerForce: 0.15,
+          linkDistance: 24,
+          fontSize: 0.55,
+          opacityScale: 1.2,
+          showTags: true,
+          removeTags: [],
+        },
+      }),
+      condition: (page) => page.fileData.slug === "index",
+    }),
+    Component.ConditionalRender({
       component: Component.RecentNotes({
-        title: "Recently Updated",
-        limit: 10,
+        title: "最近更新",
+        limit: 8,
         linkToMore: false,
         showTags: true,
         filter: (f) => f.slug !== "index",
@@ -58,13 +77,29 @@ export const defaultContentPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.Explorer({
-      folderDefaultState: "open",
-      folderClickBehavior: "collapse",
+      folderDefaultState: "collapsed",
+      folderClickBehavior: "link",
       title: "",
     }),
   ],
   right: [
     Component.DesktopOnly(Component.TableOfContents()),
+    Component.DesktopOnly(Component.Graph({
+      localGraph: {
+        drag: true,
+        zoom: true,
+        depth: 1,
+        scale: 1.1,
+        repelForce: 0.5,
+        centerForce: 0.3,
+        linkDistance: 30,
+        fontSize: 0.6,
+        opacityScale: 1,
+        showTags: false,
+        removeTags: [],
+      },
+      globalGraph: undefined,
+    })),
     Component.ConditionalRender({
       component: Component.TagCloud(),
       condition: (page) => page.fileData.slug === "index",
@@ -89,8 +124,8 @@ export const defaultListPageLayout: PageLayout = {
     }),
     Component.HomeLink(),
     Component.Explorer({
-      folderDefaultState: "open",
-      folderClickBehavior: "collapse",
+      folderDefaultState: "collapsed",
+      folderClickBehavior: "link",
       title: "",
     }),
   ],

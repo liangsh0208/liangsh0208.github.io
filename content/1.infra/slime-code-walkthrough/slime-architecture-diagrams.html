@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slime 代码走读 — 架构详解与数据流图解</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg: #f6f8fa;
+            --card-bg: #fff;
+            --text: #1f2328;
+            --text-secondary: #656d76;
+            --border: #d0d7de;
+            --accent: #0969da;
+            --accent-light: #ddf4ff;
+            --green: #1a7f37;
+            --green-light: #dafbe1;
+            --orange: #bc4c00;
+            --orange-light: #fff5e6;
+            --purple: #8250df;
+            --purple-light: #fbefff;
+            --red: #cf222e;
+            --red-light: #ffebe9;
+            --code-bg: #f6f8fa;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.2em;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-top: 50px;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        h3 {
+            font-size: 1.2em;
+            color: var(--text);
+            margin-top: 30px;
+        }
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            margin-bottom: 30px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+        .badge-blue { background: var(--accent-light); color: var(--accent); }
+        .badge-green { background: var(--green-light); color: var(--green); }
+        .badge-orange { background: var(--orange-light); color: var(--orange); }
+        .badge-purple { background: var(--purple-light); color: var(--purple); }
+        .badge-red { background: var(--red-light); color: var(--red); }
+        .highlight-box {
+            background: var(--accent-light);
+            border-left: 4px solid var(--accent);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .warn-box {
+            background: var(--orange-light);
+            border-left: 4px solid var(--orange);
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 15px 0;
+        }
+        .mermaid {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SF Mono", Monaco, Inconsolata, "Fira Code", monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background: var(--code-bg);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+            font-size: 0.85em;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+        .toc {
+            position: sticky;
+            top: 20px;
+            float: right;
+            width: 260px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-left: 20px;
+            font-size: 0.88em;
+        }
+        .toc h4 { margin: 0 0 12px 0; font-size: 1em; }
+        .toc ul { list-style: none; padding: 0; margin: 0; }
+        .toc li { margin: 6px 0; }
+        .toc a { color: var(--text-secondary); text-decoration: none; }
+        .toc a:hover { color: var(--accent); }
+        .main-content { max-width: calc(100% - 300px); }
+        @media (max-width: 1000px) {
+            .toc { display: none; }
+            .main-content { max-width: 100%; }
+        }
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 800px) {
+            .two-col { grid-template-columns: 1fr; }
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.92em;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            text-align: left;
+        }
+        th {
+            background: var(--code-bg);
+            font-weight: 600;
+        }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .metric-item {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .metric-label { font-size: 0.8em; color: var(--text-secondary); }
+        .metric-value { font-size: 1.3em; font-weight: 700; color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🦠 Slime 代码走读 — 架构详解与数据流图解</h1>
+        <p class="subtitle">基于 Megatron-LM + SGLang + Ray 的大规模 RL 训练框架（任务 306872698, Qwen3-32B GRPO）</p>
+
+        <div class="toc">
+            <h4>📑 目录</h4>
+            <ul>
+                <li><a href="#sec-arch">1. 系统架构全景图</a></li>
+                <li><a href="#sec-entry">2. 训练入口调用链</a></li>
+                <li><a href="#sec-rollout">3. Rollout 系统架构</a></li>
+                <li><a href="#sec-pipeline">4. 训练主循环流水线</a></li>
+                <li><a href="#sec-dataflow">5. 数据流详解</a></li>
+                <li><a href="#sec-loss">6. Loss 计算链路</a></li>
+                <li><a href="#sec-parallel">7. 并行策略拓扑</a></li>
+                <li><a href="#sec-cp">8. Context Parallel 细节</a></li>
+                <li><a href="#sec-sync">9. 权重同步流程</a></li>
+                <li><a href="#sec-timeline">10. 时间线分析</a></li>
+                <li><a href="#sec-perf">11. 性能指标拆解</a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+
+<!-- ==================== 1. 系统架构 ==================== -->
+<h2 id="sec-arch">1. 系统架构全景图</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph Host["<b>Ray Cluster (4 nodes × 8 GPU)</b>"]
+        subgraph Node1["Node 0 (8× H20-3e)"]
+            G0["GPU 0"]
+            G1["GPU 1"]
+            G7["GPU 7"]
+        end
+        subgraph Node2["Node 1"]
+            G8["GPU 8"]
+            G15["GPU 15"]
+        end
+        subgraph Node3["Node 2"]
+            G16["GPU 16"]
+            G23["GPU 23"]
+        end
+        subgraph Node4["Node 3"]
+            G24["GPU 24"]
+            G31["GPU 31"]
+        end
+    end
+
+    subgraph PG["Placement Group Bundles"]
+        B1["bundle 0<br/>8 GPU"]
+        B2["bundle 1<br/>8 GPU"]
+        B3["bundle 2<br/>8 GPU"]
+        B4["bundle 3<br/>8 GPU"]
+    end
+
+    subgraph RayActors["Ray Actors"]
+        RM["🧭 RolloutManager"]
+        SG["🚀 SGLangEngine × N"]
+        MTA["⚙️ MegatronTrainRayActor × 32"]
+        ROUTER["🌐 SGLang Router"]
+    end
+
+    subgraph Training["Megatron 训练组"]
+        TP["TP Group (8)"]
+        DP1["DP Rank 0"]
+        DP2["DP Rank 1"]
+        DP3["DP Rank 2"]
+        DP4["DP Rank 3"]
+        PP["PP Stage 0<br/>(PP=1)"]
+    end
+
+    B1 --> G0 & G1 & G7
+    B2 --> G8 & G15
+    B3 --> G16 & G23
+    B4 --> G24 & G31
+
+    RM --> ROUTER --> SG
+    SG -.->|offload/onload| MTA
+    MTA --> TP --> DP1 & DP2 & DP3 & DP4
+    DP1 & DP2 & DP3 & DP4 --> PP
+
+    style RM fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style SG fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style MTA fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style ROUTER fill:#fff5e6,stroke:#bc4c00,stroke-width:2px
+    </div>
+</div>
+
+<div class="card">
+    <h3>角色职责对照表</h3>
+    <table>
+        <tr><th>角色</th><th>代码位置</th><th>职责</th><th>GPU 占用</th></tr>
+        <tr><td><span class="badge badge-purple">RolloutManager</span></td><td><code>ray/rollout.py:349</code></td><td>全局协调 Rollout、数据转换、评测调度</td><td>0.2 GPU（被 PG 绑定）</td></tr>
+        <tr><td><span class="badge badge-blue">SGLangEngine</span></td><td><code>backends/sglang_utils/sglang_engine.py</code></td><td>自回归 decode 生成 response</td><td>8 GPU / engine</td></tr>
+        <tr><td><span class="badge badge-orange">SGLang Router</span></td><td>外部 multiprocessing</td><td>HTTP 负载均衡 + Prefix Cache routing</td><td>CPU</td></tr>
+        <tr><td><span class="badge badge-green">MegatronTrainRayActor</span></td><td><code>backends/megatron_utils/actor.py:45</code></td><td>模型训练（fwd/bwd/optimizer）</td><td>1 GPU / rank</td></tr>
+        <tr><td><span class="badge badge-green">RayTrainGroup</span></td><td><code>ray/actor_group.py:10</code></td><td>管理同角色 actors 集合</td><td>本地 Python 对象</td></tr>
+    </table>
+</div>
+
+<!-- ==================== 2. 训练入口 ==================== -->
+<h2 id="sec-entry">2. 训练入口调用链</h2>
+<div class="card">
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant Shell as shell/run-qwen3-32B.sh
+    participant TP as train.py
+    participant PG as placement_group.py
+    participant RM as RolloutManager
+    participant SG as RolloutServer/ServerGroup
+    participant AG as RayTrainGroup
+    participant MTA as MegatronTrainRayActor
+
+    Shell->>TP: 设置环境变量 + 参数
+    TP->>PG: create_placement_groups(args)
+    PG-->>TP: PG bundle + GPU 重排序
+
+    TP->>RM: create_rollout_manager(args, pg)
+    activate RM
+    RM->>SG: start_rollout_servers()
+    SG->>SG: _resolve_sglang_config()
+    SG->>SG: _start_router()
+    SG->>SG: _make_group() × N
+    SG->>SG: group.start_engines()
+    activate SG
+    SG->>SG: SGLangEngine.remote() × num_engines
+    SG->>SG: engine.init.remote()
+    deactivate SG
+    RM-->>TP: rollout_manager handle
+    deactivate RM
+
+    TP->>AG: create_training_models(args, pgs)
+    activate AG
+    AG->>MTA: for rank: TrainRayActor.remote()
+    activate MTA
+    MTA->>MTA: init() → dist.init_process_group()
+    MTA->>MTA: init() → Megatron 初始化
+    MTA->>MTA: initialize_model_and_optimizer()
+    deactivate MTA
+    AG-->>TP: actor_model, critic_model
+    deactivate AG
+
+    TP->>MTA: actor_model.update_weights()
+    MTA->>RM: get_updatable_engines_and_lock()
+    MTA->>MTA: Megatron→HF→NCCL broadcast→SGLang
+    </div>
+</div>
+
+<!-- ==================== 3. Rollout ==================== -->
+<h2 id="sec-rollout">3. Rollout 系统架构</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph DataSrc["📦 DataSource"]
+        DS[(dapo-math-17k.jsonl)]
+        DT["Dataset()<br/>tokenizer + chat_template"]
+        SP["Sample(prompt) × batch_size"]
+    end
+
+    subgraph GenState["🔄 GenerateState (Singleton)"]
+        SEMA["asyncio.Semaphore<br/>并发控制"]
+        SEED["group_sampling_seeds<br/>(deterministic)"]
+        DPRC["dp_rank_context()<br/>负载均衡"]
+    end
+
+    subgraph GenPipeline["🚀 Async Generation Pipeline"]
+        GP1["generate_and_rm_group()<br/>同一 prompt 的 N 条 sample"]
+        GP2["generate_and_rm()<br/>单条 sample 生成 + reward"]
+        GP3["generate()<br/>HTTP → SGLang Router → Engine"]
+        GP4["async_rm()<br/>DeepScaler / Math / F1 reward"]
+    end
+
+    subgraph Post["📝 Post Processing"]
+        DYNF["dynamic_filter()<br/>过滤低质量样本"]
+        POST["_convert_samples_to_train_data()<br/>extract tokens/loss_masks/rewards"]
+        SPLIT["_split_train_data_by_dp()<br/>按 DP size 分发"]
+    end
+
+    DS --> DT --> SP
+    SP --> GenPipeline
+    SEMA --> GP1
+    SEED --> GP1
+    DPRC --> GP1
+    GP1 --> GP2 --> GP3 --> GP4
+    GP4 --> DYNF --> POST --> SPLIT
+
+    style GenPipeline fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style Post fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    </div>
+</div>
+
+<div class="card">
+    <h3>RolloutManager 对象模型</h3>
+    <div class="mermaid">
+classDiagram
+    class RolloutManager {
+        +servers: dict[str, RolloutServer]
+        +data_source: DataSource
+        +generate_rollout: Callable
+        +rollout_engine_lock: Lock
+        +_health_monitors: list
+        +generate(rollout_id)
+        +eval(rollout_id)
+        +offload()
+        +onload()
+    }
+    class RolloutServer {
+        +server_groups: list[ServerGroup>
+        +router_ip: str
+        +router_port: int
+        +engines: list [node-0 only]
+        +all_engines: list
+        +recover()
+        +offload()
+    }
+    class ServerGroup {
+        +all_engines: list<SGLangEngine>
+        +num_gpus_per_engine: int
+        +needs_offload: bool
+        +worker_type: str
+        +start_engines()
+        +offload()
+    }
+    class SGLangEngine {
+        +init(addr, port, router)
+        +release_memory_occupation()
+        +resume_memory_occupation()
+        +update_weight(name, tensor)
+    }
+
+    RolloutManager "1" --> "*" RolloutServer : servers
+    RolloutServer "1" --> "*" ServerGroup : server_groups
+    ServerGroup "1" --> "*" SGLangEngine : all_engines
+    </div>
+</div>
+
+<!-- ==================== 4. 训练主循环 ==================== -->
+<h2 id="sec-pipeline">4. 训练主循环流水线</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph Init["🚀 启动阶段"]
+        I1["parse_args()<br/>1777行参数系统"]
+        I2["create_placement_groups()"]
+        I3["create_rollout_manager()"]
+        I4["create_training_models()"]
+        I5["actor_model.update_weights()<br/>首次权重同步"]
+    end
+
+    subgraph RolloutLoop["📌 Rollout 循环 (N=1000)"]
+        R0["rollout_id in [0, 999]"]
+        R1["generate()<br/>SGLang 采样"]
+        R2["_convert_samples_to_train_data()<br/>RolloutBatch"]
+        R3["_split_train_data_by_dp()<br/>Box(ray.put())"]
+    end
+
+    subgraph TrainStep["⚙️ 单 Rollout 训练"]
+        T1["MegatronTrainRayActor.train()"]
+        T2["_get_rollout_data()<br/>Ray→GPU transfer"]
+        T3["compute_log_prob(ref_model)<br/>ref_log_probs"]
+        T4["compute_log_prob(actor)<br/>old_log_probs"]
+        T5["compute_advantages_and_returns()<br/>GRPO/GAE"]
+        T6["train() → train_one_step()×N"]
+        T7["log_rollout_data() + log_perf_data()"]
+        T8["weights_backuper.backup('actor')"]
+    end
+
+    subgraph Sync["🔄 同步阶段"]
+        S1["actor_model.update_weights()<br/>Megatron → SGLang"]
+        S2["Megatron→HF→quantize→NCCL broadcast"]
+    end
+
+    subgraph Eval["📊 评测阶段 (每20轮)"]
+        E1["eval()<br/>AIME2024"]
+        E2["eval_rollout()<br/>HTTP 并行评测"]
+    end
+
+    Init --> RolloutLoop
+    R0 --> R1 --> R2 --> R3 --> TrainStep
+    TrainStep --> Sync --> Eval
+    Eval -->|rollout_id < 999| RolloutLoop
+    Eval -->|rollout_id == 999| Finish["🏁 finish_tracking()"]
+
+    style TrainStep fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style Sync fill:#fff5e6,stroke:#bc4c00,stroke-width:2px
+    style Eval fill:#fbefff,stroke:#8250df,stroke-width:2px
+    </div>
+</div>
+
+<div class="card">
+    <h3>Colocate vs 分离部署对比</h3>
+    <div class="mermaid">
+flowchart LR
+    subgraph Colocate["Colocate 模式<br/>(--colocate)"]
+        C1["GPU 0-7: SGLang Engine<br/>(generate phase)"]
+        C2["--- offload ---<br/>release_memory_occupation()"]
+        C3["GPU 0-7: Megatron Actor<br/>(train phase)"]
+        C4["--- onload ---<br/>resume_memory_occupation()"]
+        C5["Weight Sync<br/>(内存 copy)"]
+        C1 --> C2 --> C3 --> C4 --> C5 --> C1
+    end
+
+    subgraph Separate["分离部署模式"]
+        S1["GPU 0-15: SGLang Engines<br/>持续服务"]
+        S2["GPU 16-31: Megatron Actors<br/>持续训练"]
+        S3["Weight Sync<br/>(NCCL broadcast 跨节点)"]
+        S1 <-->|并行| S2
+        S2 --> S3 --> S1
+    end
+
+    style Colocate fill:#fff5e6,stroke:#bc4c00
+    style Separate fill:#ddf4ff,stroke:#0969da
+    </div>
+    <p><b>关键差异</b>：Colocate 模式下 GPU 分时复用，<code>needs_offload=True</code>；分离部署模式下并行但 weight sync 走网络。</p>
+</div>
+
+<!-- ==================== 5. 数据流 ==================== -->
+<h2 id="sec-dataflow">5. 数据流详解</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph Src["📄 Raw Data"]
+        J[(dapo-math-17k.jsonl)]
+    end
+
+    subgraph SampleLevel["🧩 Sample Level (CPU/Ray)"]
+        S1["Sample {<br/>prompt: str<br/>tokens: list[int]<br/>status: PENDING<br/>}"]
+        S2["Sample {<br/>prompt + response<br/>reward: float<br/>rollout_log_probs: list[float]<br/>status: COMPLETED<br/>}"]
+    end
+
+    subgraph BatchLevel["📦 RolloutBatch (CPU→GPU)"]
+        B1["dict {<br/>tokens: [tensor, tensor, ...]<br/>loss_masks: [tensor, ...]<br/>rewards: [float, ...]<br/>rollout_log_probs: [tensor, ...]<br/>}"]
+    end
+
+    subgraph DPLevel["🔀 DP Distributed (per rank)"]
+        D1["Rank 0: Box(ray.put({tokens[0,4,8...], ...}))"]
+        D2["Rank 1: Box(ray.put({tokens[1,5,9...], ...}))"]
+        D3["Rank 2: Box(ray.put({tokens[2,6,10...], ...}))"]
+        D4["Rank 3: Box(ray.put({tokens[3,7,11...], ...}))"]
+    end
+
+    subgraph Microbatch["🎲 Microbatch (Megatron Pipeline)"]
+        M1["get_batch() → {<br/>tokens: [1, T_padded]<br/>packed_seq_params: cu_seqlens<br/>full_loss_masks: tensor<br/>advantages: tensor<br/>}"]
+    end
+
+    J -->|Dataset.__init__ +<br/>_build_messages| S1
+    S1 -->|generate_and_rm| S2
+    S2 -->|_convert_samples_to_train_data| B1
+    B1 -->|_split_train_data_by_dp| D1 & D2 & D3 & D4
+    D1 & D2 & D3 & D4 -->|Ray.get() +<br/>_get_rollout_data| Microbatch
+    Microbatch -->|forward_step| Model
+
+    style SampleLevel fill:#fbefff,stroke:#8250df
+    style BatchLevel fill:#ddf4ff,stroke:#0969da
+    style Microbatch fill:#dafbe1,stroke:#1a7f37
+    </div>
+</div>
+
+<!-- ==================== 6. Loss ==================== -->
+<h2 id="sec-loss">6. Loss 计算链路</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph Inputs["🎯 输入"]
+        I1["logits (Megatron output)<br/>[1, T, vocab_size]"]
+        I2["batch['advantages']<br/>per-token advantage"]
+        I3["batch['rollout_log_probs']<br/>from SGLang = old policy"]
+        I4["batch['ref_log_probs']<br/>from ref model"]
+    end
+
+    subgraph LogProbs["📐 Log Prob 计算"]
+        LP1["get_log_probs_and_entropy()"]
+        LP2["get_responses()<br/>切 response 段"]
+        LP3["calculate_log_probs_and_entropy()"]
+        LP4["fused_vocab_parallel_cross_entropy()<br/>(Megatron TP fused kernel)"]
+        LP5["new_log_probs + entropy"]
+    end
+
+    subgraph PolicyLoss["📉 Policy Loss (PPO/GRPO)"]
+        P1["ppo_kl = old_log_probs - new_log_probs<br/>即 log(π_old/π_new)"]
+        P2["ratio = exp(-ppo_kl) = π_new / π_old"]
+        P3["clamp(ratio, 1-ε, 1+ε_high)"]
+        P4["pg_loss = -min(ratio*adv, clamped*adv)"]
+        P5["pg_clipfrac = (clipped > unclipped).mean()"]
+    end
+
+    subgraph Options["🔧 可选附加"]
+        O1["TIS: ratio mask (reject off-policy)"]
+        O2["OPSM: seq-level mask (reject high-KL seq)"]
+        O3["kl_loss: KL(π_new || π_ref)"]
+        O4["entropy_loss: encourage exploration"]
+    end
+
+    subgraph Total["📊 Total Loss"]
+        TOT["loss = pg_loss<br/>- entropy_coef * entropy_loss<br/>+ kl_loss_coef * kl_loss"]
+    end
+
+    I1 & I2 & I3 & I4 --> LogProbs --> PolicyLoss --> Total
+    Options --> Total
+
+    style PolicyLoss fill:#fff5e6,stroke:#bc4c00,stroke-width:2px
+    style Total fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    </div>
+</div>
+
+<div class="card">
+    <h3>GRPO vs PPO vs Reinforce++ 的 Advantage 计算对比</h3>
+    <div class="mermaid">
+flowchart LR
+    subgraph GRPO["GRPO"]
+        G1["reward: group_norm 后"]
+        G2["returns = reward.expand(kl.shape)"]
+        G3["advantages = returns<br/>(no value model)"]
+    end
+
+    subgraph PPO["PPO + GAE"]
+        P1["values: critic model output"]
+        P2["rewards: [-kl_coef*kl; last += reward]"]
+        P3["GAE: Adv_t = δ_t + (γλ)δ_{t+1} + ..."]
+        P4["returns = advantages + values"]
+    end
+
+    subgraph RPP["Reinforce++"]
+        R1["token-level rewards = -kl_coef * kl"]
+        R2["last token += group_reward"]
+        R3["G_t = r_t + γ*G_{t+1}<br/>(discount backprop)"]
+        R4["advantages = returns = G_t"]
+    end
+
+    style GRPO fill:#fbefff,stroke:#8250df,stroke-width:2px
+    style PPO fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    style RPP fill:#fff5e6,stroke:#bc4c00,stroke-width:2px
+    </div>
+</div>
+
+<!-- ==================== 7. 并行策略 ==================== -->
+<h2 id="sec-parallel">7. 并行策略拓扑</h2>
+<div class="card">
+    <h3>Qwen3-32B @ 32 GPU 的并行配置</h3>
+    <div class="mermaid">
+flowchart TB
+    subgraph World["World Size = 32"]
+        direction LR
+        subgraph DP0["🟦 DP Rank 0 (8 GPU)"]
+            TP0A["TP Rank 0"]
+            TP0B["TP Rank 7"]
+        end
+        subgraph DP1["🟩 DP Rank 1 (8 GPU)"]
+            TP1A["TP Rank 0"]
+            TP1B["TP Rank 7"]
+        end
+        subgraph DP2["🟥 DP Rank 2 (8 GPU)"]
+            TP2A["TP Rank 0"]
+            TP2B["TP Rank 7"]
+        end
+        subgraph DP3["🟨 DP Rank 3 (8 GPU)"]
+            TP3A["TP Rank 0"]
+            TP3B["TP Rank 7"]
+        end
+    end
+
+    subgraph Calc["计算关系"]
+        D["Data Parallel<br/>不同 sample 不同 GPU"]
+        T["Tensor Parallel<br/>同一 layer 不同 GPU"]
+        P["Pipeline Parallel<br/>不同 layer 不同 GPU<br/>(本任务 PP=1)"]
+        C["Context Parallel<br/>同一 sequence 不同 GPU<br/>(本任务 CP=1)"]
+    end
+
+    D --> DP0 & DP1 & DP2 & DP3
+    T --> TP0A & TP0B
+    P -.-> P1["PP=1: 所有 layer 在同一 GPU"]
+    C -.-> C1["CP=1: 完整 sequence 在同一 GPU"]
+
+    style Calc fill:#f6f8fa,stroke:#d0d7de
+    </div>
+
+    <div class="metric-grid">
+        <div class="metric-item">
+            <div class="metric-label">TP Size</div>
+            <div class="metric-value">8</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-label">DP Size</div>
+            <div class="metric-value">4</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-label">PP Size</div>
+            <div class="metric-value">1</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-label">CP Size</div>
+            <div class="metric-value">1</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-label">Total GPU</div>
+            <div class="metric-value">32</div>
+        </div>
+        <div class="metric-item">
+            <div class="metric-label">Global Batch</div>
+            <div class="metric-value">256</div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 8. CP ==================== -->
+<h2 id="sec-cp">8. Context Parallel 细节</h2>
+<div class="card">
+    <h3>CP=2 时的 Zigzag Ring Attention 切分</h3>
+    <div class="mermaid">
+block-beta
+    columns 6
+    space space space space space space
+    block:seq0:6
+        columns 6
+        s0["token_0"]
+        s1["token_1"]
+        s2["token_2"]
+        s3["token_3"]
+        s4["token_4"]
+        s5["token_5"]
+    end
+    space space space space space space
+    block:rank0:6
+        columns 6
+        r0a["🟩 R0 chunk_0<br/>token_0, token_1"]
+        r0b["🟩 R0 chunk_1<br/>token_4, token_5"]
+        space space space space
+    end
+    block:rank1:6
+        columns 6
+        space space
+        r1a["🟦 R1 chunk_0<br/>token_2, token_3"]
+        space space space space
+    end
+
+    style r0a fill:#dafbe1
+    style r0b fill:#dafbe1
+    style r1a fill:#ddf4ff
+    </div>
+
+    <p><code>chunk_size = ceil(total_length / (2 * cp_size))</code>，<code>cp_rank=0</code> 拿正序第 0 段 + 逆序第 1 段，<code>cp_rank=1</code> 拿中间段。这样在 ring allreduce 时相邻 rank 通信的 segment 是连续的。</p>
+</div>
+
+<div class="card">
+    <h3>CP 场景下的 logprob allgather + redistribute</h3>
+    <div class="mermaid">
+sequenceDiagram
+    autonumber
+    participant R0 as CP Rank 0
+    participant R1 as CP Rank 1
+    participant AG as dist.nn.all_reduce
+
+    Note over R0,R1: 各 rank 只有 response 的局部段
+    R0->>AG: 构建 full_resp (padding 局部段到完整 response_length)
+    R1->>AG: 构建 full_resp
+    AG-->>R0: all_reduce(full_resp) → 完整 response logprob
+    AG-->>R1: all_reduce(full_resp) → 完整 response logprob
+
+    Note over R0,R1: 重新 slice 回 zigzag 模式
+    R0->>R0: slice_log_prob_with_cp(full_resp) → local chunk
+    R1->>R1: slice_log_prob_with_cp(full_resp) → local chunk
+
+    Note over R0,R1: 现在 PPO ratio 计算正确了
+    </div>
+</div>
+
+<!-- ==================== 9. 权重同步 ==================== -->
+<h2 id="sec-sync">9. 权重同步流程</h2>
+<div class="card">
+    <div class="mermaid">
+flowchart TB
+    subgraph Megatron["Megatron Actor (TP=8)"]
+        M1["megatron_utils/actor.py"]
+        M2["named_params_and_buffers()<br/>遍历 DDP model parameters"]
+        M3["all_gather_param()<br/>TP gather → full param on TP rank 0"]
+        M4["convert_to_hf()<br/>Megatron naming → HF naming"]
+        M5["remove_padding()<br/>去除 Megatron 对齐 padding"]
+        M6["quantize (optional)<br/>int4/fp8/compressed-tensors"]
+    end
+
+    subgraph Broadcast["NCCL / Memory Sync"]
+        B1["PP src rank:<br/>DP=0, TP=0, CP=0"]
+        B2["dist.broadcast()<br/>→ SGLang engine ranks"]
+        B3["buffer bucket<br/>避免一次性传输过大"]
+        B4["expert params 单独处理<br/>EP gather + broadcast"]
+    end
+
+    subgraph SGLangSide["SGLang Engine"]
+        S1["接收 HF format tensor"]
+        S2["post_process_quantization()<br/>(int4/fp4 反量化)"]
+        S3["engine.update_weight.remote(name, tensor)"]
+        S4["加载到 GPU memory"]
+        S5["重建 CUDA Graphs"]
+    end
+
+    Megatron --> Broadcast --> SGLangSide
+
+    style Megatron fill:#dafbe1,stroke:#1a7f37,stroke-width:2px
+    style Broadcast fill:#fff5e6,stroke:#bc4c00,stroke-width:2px
+    style SGLangSide fill:#ddf4ff,stroke:#0969da,stroke-width:2px
+    </div>
+</div>
+
+<div class="card">
+    <h3>UpdateWeightFromDistributed 状态机</h3>
+    <pre><code>update_weights()
+  ├── pause_generation()          ← SGLang 暂停接收新请求
+  ├── flush_cache()               ← 清空 KV cache
+  ├── barrier()                   ← GLOO
+  ├── for each non-expert param:
+  │     ├── all_gather_param()    ← TP allgather
+  │     ├── convert_to_hf()       ← Megatron → HF
+  │     ├── bucket buffer          ← 累积到 buffer_size > threshold 后 flush
+  │     └── broadcast to engines   ← dist.broadcast() / remote update
+  ├── barrier()
+  ├── for each expert param:
+  │     ├── EP gather             ← expert model parallel gather
+  │     └── broadcast
+  ├── barrier()
+  ├── post_process_quantization()  ← int4 反量化
+  ├── continue_generation()        ← SGLang 恢复
+  └── barrier()</code></pre>
+</div>
+
+<!-- ==================== 10. 时间线 ==================== -->
+<h2 id="sec-timeline">10. 时间线分析</h2>
+<div class="card">
+    <div class="mermaid">
+gantt
+    title 一个 Rollout 的 Wall-Clock 时间线（Colocate 模式）
+    dateFormat X
+    axisFormat %s
+
+    section SGLang
+    generate response           : 0, 3
+    non_generation (scheduling)  : 0, 0.5
+
+    section Megatron
+    log_probs (ref + actor)      : 3, 4.5
+    compute_advantages           : 4.5, 5
+    train (fwd + bwd + opt)     : 5, 8
+    log_rollout_data             : 3, 3.1
+    log_perf_data                : 8, 8.1
+
+    section Sync
+    offload sglang               : 2.8, 3
+    update_weights              : 8, 8.5
+    onload sglang               : 8.5, 8.6
+
+    section Wait
+    train_wait (idle)           : 0, 0.3
+    </div>
+
+    <div class="warn-box">
+        <b>⚠️ 关键洞察</b>：在 colocate 模式下，<code>generate</code> 和 <code>train</code> 无法并行，因为独占同一组 GPU。训练吞吐公式：<br>
+        <code>effective throughput = samples_per_rollout / (generate_time + train_time + sync_time)</code><br>
+        在分离部署模式下理论上可以 overlap generate_{N+1} 和 train_N（如果实现 async pipeline）。
+    </div>
+</div>
+
+<!-- ==================== 11. 性能指标 ==================== -->
+<h2 id="sec-perf">11. 性能指标拆解</h2>
+<div class="card">
+    <h3>perf/* 指标来源图解</h3>
+    <div class="mermaid">
+flowchart LR
+    subgraph Timers["⏱️ Timer (Singleton)"]
+        T1["rollout_time"]
+        T2["log_probs_time<br/>ref_log_probs_time"]
+        T3["train_wait_time<br/>(inverse_timer)"]
+        T4["train_time"]
+        T5["actor_train_time<br/>(train_one_step)"]
+        T6["data_preprocess_time"]
+        T7["update_weights_time"]
+        T8["save_model_time"]
+    end
+
+    subgraph Metrics["📊 Metrics 计算"]
+        M1["perf/actor_train_tflops<br/>= 3×fwd_flops / actor_train_time"]
+        M2["perf/step_time<br/>= train_wait + train"]
+        M3["perf/wait_time_ratio<br/>= train_wait / step_time"]
+        M4["perf/tokens_per_gpu_per_sec<br/>= Σseq_lens / rollout_time / num_gpus"]
+    end
+
+    Timers --> Metrics
+
+    style Timers fill:#f6f8fa,stroke:#d0d7de
+    style Metrics fill:#dafbe1,stroke:#1a7f37
+    </div>
+
+    <table>
+        <tr><th>指标</th><th>计算公式</th><th>健康范围</th><th>异常信号</th></tr>
+        <tr><td>actor_train_tflops</td><td>3×Σfwd_flops / actor_train_time</td><td>~40-60% peak</td><td>&lt; 30% 表示 compute bound 未跑满</td></tr>
+        <tr><td>wait_time_ratio</td><td>train_wait / step_time</td><td>&lt; 20%</td><td>&gt; 40% 说明 generate/train pipeline 失衡</td></tr>
+        <tr><td>tokens_per_gpu_per_sec</td><td>Σresponse_len / rollout_time / N_gpus</td><td>模型相关</td><td>对比 H20 理论吞吐</td></tr>
+        <tr><td>pg_clipfrac</td><td>(ratio_clipped ≠ ratio).mean()</td><td>&lt; 0.2</td><td>&gt; 0.3 策略变化过快</td></tr>
+        <tr><td>ppo_kl</td><td>old_logp - new_logp</td><td>0.01~0.1</td><td>&gt; 0.5 或 NaN 需紧急干预</td></tr>
+    </table>
+</div>
+
+<div class="card">
+    <h3>诊断工具栈</h3>
+    <div class="two-col">
+        <div>
+            <h4>训练端诊断</h4>
+            <ul>
+                <li><code>train/*</code> 日志 — 学习动力学</li>
+                <li><code>perf/*</code> 日志 — 时间分解</li>
+                <li><code>rollout/*</code> 日志 — 生成质量</li>
+                <li>PyTorch Profiler Chrome Trace — NCCL 通信</li>
+                <li><code>nvidia-smi dmon</code> — GPU 利用率</li>
+            </ul>
+        </div>
+        <div>
+            <h4>推理端诊断</h4>
+            <ul>
+                <li>SGLang <code>metrics</code> endpoint — decode token/s</li>
+                <li>Prefix cache hit rate — KV 复用</li>
+                <li>Speculative decoding accept rate</li>
+                <li>Router 负载均衡 — dp_rank 分布</li>
+                <li>CUDA Graph hit rate</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="highlight-box">
+    <b>💡 一句话总结</b>：slime 是一个典型的"<b>Ray 调度 + Megatron 训练 + SGLang 推理</b>"三层分离架构。性能优化的核心矛盾永远是在 <b>generate（memory-bound）和 train（compute-bound）之间的 GPU 时间分配</b>。MFU 只覆盖了 train 阶段的计算效率，端到端的 wall-clock throughput 才是真正的优化目标。
+</div>
+
+        </div> <!-- main-content -->
+    </div> <!-- container -->
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#ddf4ff',
+                primaryTextColor: '#1f2328',
+                primaryBorderColor: '#0969da',
+                lineColor: '#656d76',
+                secondaryColor: '#f6f8fa',
+                tertiaryColor: '#dafbe1',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+                fontSize: '14px'
+            },
+            flowchart: {
+                curve: 'basis',
+                padding: 15,
+                nodeSpacing: 30,
+                rankSpacing: 40
+            },
+            sequence: {
+                diagramMarginX: 20,
+                diagramMarginY: 20,
+                actorMargin: 40,
+                width: 150,
+                height: 65,
+                boxMargin: 10,
+                boxTextMargin: 5,
+                noteMargin: 10,
+                messageMargin: 35
+            },
+            gantt: {
+                titleTopMargin: 25,
+                barHeight: 20,
+                barGap: 4,
+                topPadding: 50,
+                leftPadding: 75
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Megatron Infra / CUDA / Trace 性能优化实战手册</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --paper: #ffffff;
+      --ink: #172033;
+      --muted: #5d6b82;
+      --line: #d9e2ef;
+      --blue: #2563eb;
+      --green: #16a34a;
+      --orange: #f97316;
+      --purple: #7c3aed;
+      --red: #dc2626;
+      --code-bg: #0f172a;
+      --code-fg: #dbeafe;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.72;
+    }
+    .layout { display: grid; grid-template-columns: 290px 1fr; min-height: 100vh; }
+    nav {
+      position: sticky; top: 0; height: 100vh; overflow: auto;
+      padding: 28px 22px; border-right: 1px solid var(--line); background: #eef3fb;
+    }
+    nav h2 { font-size: 17px; margin: 0 0 18px; }
+    nav a { display: block; color: #334155; text-decoration: none; padding: 7px 0; font-size: 14px; }
+    nav a:hover { color: var(--blue); }
+    main { max-width: 1180px; padding: 42px 56px 90px; }
+    .hero { background: linear-gradient(135deg, #0f172a, #1e3a8a); color: white; padding: 38px; border-radius: 24px; margin-bottom: 28px; }
+    .hero h1 { margin: 0 0 12px; font-size: 34px; line-height: 1.2; }
+    .hero p { margin: 0; color: #dbeafe; font-size: 17px; }
+    section { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 30px 34px; margin: 24px 0; box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04); }
+    h2 { margin-top: 0; font-size: 26px; border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+    h3 { margin-top: 30px; font-size: 20px; }
+    h4 { margin-top: 22px; font-size: 17px; }
+    .tag { display: inline-block; padding: 2px 9px; border-radius: 999px; background: #e0ecff; color: #1d4ed8; font-size: 12px; margin-right: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .card { border: 1px solid var(--line); border-radius: 16px; padding: 18px; background: #fbfdff; }
+    .card h4 { margin-top: 0; }
+    pre { background: var(--code-bg); color: var(--code-fg); padding: 18px; border-radius: 14px; overflow: auto; line-height: 1.5; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .callout { border-left: 5px solid var(--blue); background: #eff6ff; padding: 16px 18px; border-radius: 12px; color: #1e3a8a; }
+    .warn { border-left-color: var(--orange); background: #fff7ed; color: #9a3412; }
+    .ok { border-left-color: var(--green); background: #f0fdf4; color: #166534; }
+    .danger { border-left-color: var(--red); background: #fef2f2; color: #991b1b; }
+    table { border-collapse: collapse; width: 100%; margin: 14px 0; }
+    th, td { border: 1px solid var(--line); padding: 10px 12px; vertical-align: top; }
+    th { background: #f1f5f9; text-align: left; }
+    .diagram { background: #f8fafc; border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin: 18px 0; overflow-x: auto; }
+    svg { max-width: 100%; height: auto; }
+    .small { color: var(--muted); font-size: 14px; }
+    .timeline-label { font-size: 13px; fill: #334155; }
+    .caption { color: var(--muted); font-size: 14px; margin-top: 8px; }
+    .kbd { border: 1px solid #cbd5e1; border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; background: white; font-family: ui-monospace, monospace; }
+    ul.compact li { margin: 4px 0; }
+    @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } nav { position: static; height: auto; } main { padding: 24px; } .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <nav>
+      <h2>目录</h2>
+      <a href="#goal">0. 学习目标</a>
+      <a href="#workflow">1. 性能工程工作流</a>
+      <a href="#trace">2. Trace 分析核心</a>
+      <a href="#nsys">3. Nsight Systems 实战</a>
+      <a href="#ncu">4. Nsight Compute / Kernel 分析</a>
+      <a href="#kernel">5. CUDA Kernel 优化</a>
+      <a href="#attention">6. Attention / FlashAttention 优化</a>
+      <a href="#comm">7. NCCL 与通信重叠</a>
+      <a href="#system">8. 系统与集群优化</a>
+      <a href="#data">9. 数据与 Checkpoint IO</a>
+      <a href="#megatron">10. Megatron 实战项目</a>
+      <a href="#checklists">11. 排查清单</a>
+      <a href="#plan">12. 12 周实践路线</a>
+    </nav>
+
+    <main>
+      <div class="hero">
+        <h1>Megatron Infra / CUDA / Trace 性能优化实战手册</h1>
+        <p>面向大模型训练 Infra、GPU 性能优化、CUDA Kernel、NCCL 通信和系统调优的实践路线。重点不是背参数，而是建立“现象 → Trace → 根因 → 优化 → 验证”的工程闭环。</p>
+      </div>
+
+      <section id="goal">
+        <h2>0. 学习目标</h2>
+        <p>目标岗位包括：<span class="tag">Megatron Infra</span><span class="tag">Training Infra</span><span class="tag">CUDA Performance Engineer</span><span class="tag">GPU System Engineer</span><span class="tag">Distributed Training Engineer</span></p>
+        <div class="grid">
+          <div class="card">
+            <h4>最终要能解决的问题</h4>
+            <ul class="compact">
+              <li>GPU 利用率只有 30%～50%，能定位是 CPU、DataLoader、NCCL、Kernel 还是 IO。</li>
+              <li>多机训练扩展效率差，能分析 rank mapping、IB、NUMA、NCCL 算法和通信重叠。</li>
+              <li>Kernel 很慢，能判断 compute bound / memory bound，并从 shared memory、寄存器、warp stall、Tensor Core 角度优化。</li>
+              <li>Megatron 训练吞吐下降，能用 trace 证明瓶颈，并给出可复现实验。</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4>核心指标</h4>
+            <table>
+              <tr><th>指标</th><th>含义</th></tr>
+              <tr><td>tokens/s</td><td>端到端训练吞吐。</td></tr>
+              <tr><td>MFU</td><td>模型 FLOPs 利用率，衡量 GPU 算力被模型训练利用的程度。</td></tr>
+              <tr><td>GPU Busy</td><td>GPU 是否持续有 kernel 在跑。</td></tr>
+              <tr><td>NCCL exposed time</td><td>没有被计算隐藏的通信时间。</td></tr>
+              <tr><td>Pipeline bubble</td><td>流水线并行中的空转时间。</td></tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="workflow">
+        <h2>1. 性能工程工作流</h2>
+        <p>不要先改参数，也不要先写 kernel。第一步永远是把问题变成可观测、可复现、可对比的 trace。</p>
+        <div class="diagram">
+          <svg width="980" height="190" viewBox="0 0 980 190" role="img" aria-label="performance workflow">
+            <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#475569" /></marker></defs>
+            <rect x="20" y="55" width="130" height="70" rx="14" fill="#dbeafe" stroke="#2563eb"/><text x="85" y="86" text-anchor="middle" font-size="15">现象</text><text x="85" y="108" text-anchor="middle" font-size="12">tokens/s 下降</text>
+            <line x1="150" y1="90" x2="210" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="210" y="55" width="130" height="70" rx="14" fill="#ede9fe" stroke="#7c3aed"/><text x="275" y="86" text-anchor="middle" font-size="15">采集 Trace</text><text x="275" y="108" text-anchor="middle" font-size="12">nsys / ncu</text>
+            <line x1="340" y1="90" x2="400" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="400" y="55" width="130" height="70" rx="14" fill="#fef3c7" stroke="#f59e0b"/><text x="465" y="86" text-anchor="middle" font-size="15">定位瓶颈</text><text x="465" y="108" text-anchor="middle" font-size="12">CPU/NCCL/Kernel</text>
+            <line x1="530" y1="90" x2="590" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="590" y="55" width="130" height="70" rx="14" fill="#dcfce7" stroke="#16a34a"/><text x="655" y="86" text-anchor="middle" font-size="15">优化</text><text x="655" y="108" text-anchor="middle" font-size="12">系统/通信/算子</text>
+            <line x1="720" y1="90" x2="780" y2="90" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="780" y="55" width="150" height="70" rx="14" fill="#fee2e2" stroke="#dc2626"/><text x="855" y="86" text-anchor="middle" font-size="15">验证收益</text><text x="855" y="108" text-anchor="middle" font-size="12">A/B + 回归监控</text>
+          </svg>
+          <div class="caption">每次优化都要有 baseline、实验变量、trace 证据和收益数据。否则只是“调参玄学”。</div>
+        </div>
+        <pre><code># 建议每个实验都记录这些字段
+experiment_id: llama_7b_8gpu_tp1_pp1_dp8_baseline
+hardware: 8xA100-80G, NVSwitch
+software: CUDA, NCCL, PyTorch, Megatron commit
+model: layers, hidden, heads, seq_len, global_batch
+metrics: tokens/s, MFU, step_time, GPU busy, NCCL time, dataloader wait
+trace: nsys report path, ncu report path
+change: 本次只改一个变量
+result: 改动前后对比</code></pre>
+      </section>
+
+      <section id="trace">
+        <h2>2. Trace 分析核心</h2>
+        <p>Trace 的目标是回答：GPU 是在算、在等通信、在等 CPU、在等数据，还是在等 IO。</p>
+        <h3>2.1 正常训练 step 的理想形态</h3>
+        <div class="diagram">
+          <svg width="1040" height="270" viewBox="0 0 1040 270">
+            <text x="20" y="34" class="timeline-label">CPU</text>
+            <rect x="100" y="18" width="160" height="28" rx="5" fill="#bfdbfe"/><text x="180" y="37" text-anchor="middle" font-size="12">launch kernels</text>
+            <rect x="280" y="18" width="120" height="28" rx="5" fill="#bfdbfe"/><text x="340" y="37" text-anchor="middle" font-size="12">enqueue NCCL</text>
+            <rect x="420" y="18" width="140" height="28" rx="5" fill="#bfdbfe"/><text x="490" y="37" text-anchor="middle" font-size="12">next batch</text>
+            <rect x="590" y="18" width="170" height="28" rx="5" fill="#bfdbfe"/><text x="675" y="37" text-anchor="middle" font-size="12">checkpoint async</text>
+
+            <text x="20" y="88" class="timeline-label">GPU Compute</text>
+            <rect x="100" y="68" width="110" height="34" rx="5" fill="#86efac"/><text x="155" y="90" text-anchor="middle" font-size="12">GEMM</text>
+            <rect x="215" y="68" width="70" height="34" rx="5" fill="#bbf7d0"/><text x="250" y="90" text-anchor="middle" font-size="12">LN</text>
+            <rect x="292" y="68" width="150" height="34" rx="5" fill="#86efac"/><text x="367" y="90" text-anchor="middle" font-size="12">Attention</text>
+            <rect x="448" y="68" width="120" height="34" rx="5" fill="#86efac"/><text x="508" y="90" text-anchor="middle" font-size="12">MLP GEMM</text>
+            <rect x="574" y="68" width="150" height="34" rx="5" fill="#86efac"/><text x="649" y="90" text-anchor="middle" font-size="12">Backward</text>
+            <rect x="732" y="68" width="130" height="34" rx="5" fill="#86efac"/><text x="797" y="90" text-anchor="middle" font-size="12">Optimizer</text>
+
+            <text x="20" y="145" class="timeline-label">NCCL</text>
+            <rect x="455" y="125" width="150" height="32" rx="5" fill="#ddd6fe"/><text x="530" y="146" text-anchor="middle" font-size="12">ReduceScatter</text>
+            <rect x="620" y="125" width="135" height="32" rx="5" fill="#ddd6fe"/><text x="687" y="146" text-anchor="middle" font-size="12">AllGather</text>
+
+            <text x="20" y="202" class="timeline-label">DataLoader</text>
+            <rect x="60" y="182" width="200" height="32" rx="5" fill="#fed7aa"/><text x="160" y="203" text-anchor="middle" font-size="12">prefetch batch N+1</text>
+            <rect x="275" y="182" width="210" height="32" rx="5" fill="#fed7aa"/><text x="380" y="203" text-anchor="middle" font-size="12">tokenize / mmap / collate</text>
+            <rect x="500" y="182" width="190" height="32" rx="5" fill="#fed7aa"/><text x="595" y="203" text-anchor="middle" font-size="12">host to device overlap</text>
+
+            <line x1="100" y1="236" x2="900" y2="236" stroke="#64748b"/><text x="500" y="258" text-anchor="middle" font-size="13" fill="#475569">Time →</text>
+          </svg>
+        </div>
+        <h3>2.2 三种常见坏 trace</h3>
+        <div class="grid">
+          <div class="card">
+            <h4>GPU 空洞：CPU/DataLoader 问题</h4>
+            <div class="diagram">
+              <svg width="460" height="105" viewBox="0 0 460 105">
+                <text x="10" y="25" font-size="12">GPU</text>
+                <rect x="55" y="10" width="80" height="28" rx="4" fill="#86efac"/><rect x="230" y="10" width="100" height="28" rx="4" fill="#86efac"/>
+                <line x1="135" y1="24" x2="230" y2="24" stroke="#dc2626" stroke-width="4" stroke-dasharray="6 5"/><text x="178" y="52" font-size="12" fill="#dc2626" text-anchor="middle">idle gap</text>
+                <text x="10" y="82" font-size="12">CPU</text><rect x="140" y="65" width="85" height="26" rx="4" fill="#fed7aa"/><text x="183" y="82" font-size="11" text-anchor="middle">DataLoader</text>
+              </svg>
+            </div>
+            <p>典型根因：数据预处理慢、Python GIL、worker 不够、磁盘 IO、CPU affinity 错误、H2D copy 没有 overlap。</p>
+          </div>
+          <div class="card">
+            <h4>NCCL 暴露：通信没被隐藏</h4>
+            <div class="diagram">
+              <svg width="460" height="105" viewBox="0 0 460 105">
+                <text x="10" y="25" font-size="12">GPU</text><rect x="60" y="10" width="120" height="28" rx="4" fill="#86efac"/><rect x="185" y="10" width="130" height="28" rx="4" fill="#ddd6fe"/><rect x="320" y="10" width="80" height="28" rx="4" fill="#86efac"/>
+                <text x="120" y="29" font-size="11" text-anchor="middle">Backward</text><text x="250" y="29" font-size="11" text-anchor="middle">AllReduce</text>
+              </svg>
+            </div>
+            <p>典型根因：bucket 太大/太小、stream event 依赖错误、跨节点带宽差、rank mapping 不合理、TP/PP 放到了慢链路。</p>
+          </div>
+          <div class="card">
+            <h4>Kernel 细碎：launch overhead</h4>
+            <div class="diagram">
+              <svg width="460" height="105" viewBox="0 0 460 105">
+                <text x="10" y="25" font-size="12">GPU</text>
+                <g fill="#86efac">
+                  <rect x="60" y="12" width="18" height="24" rx="3"/><rect x="86" y="12" width="18" height="24" rx="3"/><rect x="112" y="12" width="18" height="24" rx="3"/><rect x="138" y="12" width="18" height="24" rx="3"/><rect x="164" y="12" width="18" height="24" rx="3"/><rect x="190" y="12" width="18" height="24" rx="3"/><rect x="216" y="12" width="18" height="24" rx="3"/><rect x="242" y="12" width="18" height="24" rx="3"/>
+                </g>
+                <text x="165" y="60" font-size="12" fill="#dc2626" text-anchor="middle">大量小 kernel + CPU launch overhead</text>
+              </svg>
+            </div>
+            <p>典型根因：算子未融合、动态图 graph break、batch 太小、CUDA Graph 未启用。</p>
+          </div>
+          <div class="card">
+            <h4>Straggler：某些 rank 慢</h4>
+            <div class="diagram">
+              <svg width="460" height="125" viewBox="0 0 460 125">
+                <text x="10" y="25" font-size="12">rank0</text><rect x="70" y="10" width="240" height="24" rx="4" fill="#86efac"/>
+                <text x="10" y="58" font-size="12">rank1</text><rect x="70" y="43" width="240" height="24" rx="4" fill="#86efac"/>
+                <text x="10" y="91" font-size="12">rank2</text><rect x="70" y="76" width="315" height="24" rx="4" fill="#fca5a5"/>
+                <line x1="310" y1="5" x2="310" y2="108" stroke="#64748b" stroke-dasharray="4 4"/><text x="360" y="116" font-size="12" fill="#dc2626">rank2 拖慢全局同步</text>
+              </svg>
+            </div>
+            <p>典型根因：某 GPU 降频/ECC、NUMA 错绑、网卡拥塞、数据 shard 不均、MoE expert load imbalance。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="nsys">
+        <h2>3. Nsight Systems 实战</h2>
+        <p>Nsight Systems 用来看端到端时间线：CPU、CUDA API、GPU kernel、Memcpy、NCCL、OS runtime。它回答的是“时间花在哪里”。</p>
+        <h3>3.1 最小采集命令</h3>
+        <pre><code># 单机示例
+nsys profile \
+  -o reports/llama7b_step \
+  --trace=cuda,nvtx,osrt,cudnn,cublas \
+  --capture-range=cudaProfilerApi \
+  --capture-range-end=stop \
+  python pretrain_gpt.py ...
+
+# 多机建议每个 rank 单独输出，至少采 rank0、每个节点一个本地 rank、疑似慢 rank
+nsys profile -o reports/node${NODE_RANK}_rank${LOCAL_RANK} --trace=cuda,nvtx,osrt python train.py</code></pre>
+        <h3>3.2 Trace 阅读顺序</h3>
+        <ol>
+          <li>先看 step 周期是否稳定：有没有长尾 step。</li>
+          <li>看 GPU row：是否有大空白。如果有，先别看 kernel，先看 CPU/CUDA API/DataLoader。</li>
+          <li>看 NCCL row：通信是否与 backward overlap，还是串行暴露。</li>
+          <li>看 CUDA API：是否大量 cudaStreamSynchronize、cudaMemcpy、cudaMalloc。</li>
+          <li>看 kernel pattern：是否 GEMM 很大、elementwise 很碎、attention 是否异常慢。</li>
+          <li>跨 rank 对比：同一个 step 中哪个 rank 最慢，慢在哪里。</li>
+        </ol>
+        <h3>3.3 常见 Trace 信号与解释</h3>
+        <table>
+          <tr><th>Trace 现象</th><th>可能根因</th><th>下一步</th></tr>
+          <tr><td>GPU 上出现大段空白</td><td>CPU launch 慢、DataLoader 慢、同步阻塞、H2D copy 阻塞</td><td>看 CPU thread、CUDA API、Memcpy、DataLoader worker</td></tr>
+          <tr><td>cudaMalloc 出现在 step 内</td><td>动态 shape、临时 tensor、未预分配</td><td>静态 shape、memory pool、CUDA Graph</td></tr>
+          <tr><td>cudaStreamSynchronize 很多</td><td>隐式同步、日志取 tensor.item()、跨 stream 依赖</td><td>搜索代码中的 item/synchronize/print tensor</td></tr>
+          <tr><td>NCCL AllReduce 排在 backward 之后</td><td>没有 overlap、bucket 配置不合适、grad ready 时间晚</td><td>看 bucket、stream、Megatron overlap 开关</td></tr>
+          <tr><td>某 rank NCCL 时间明显长</td><td>网络慢、rank mapping 错、straggler</td><td>查 nvidia-smi topo、IB counter、DCGM</td></tr>
+        </table>
+        <div class="callout warn"><strong>实践建议：</strong>每次只采 5～20 个稳定 step。trace 太长会很难读，也会引入 profiler overhead。</div>
+      </section>
+
+      <section id="ncu">
+        <h2>4. Nsight Compute / Kernel 分析</h2>
+        <p>Nsight Compute 用来看单个 CUDA kernel 为什么慢。它回答的是“这个 kernel 被什么限制住”。</p>
+        <h3>4.1 Kernel 分类</h3>
+        <div class="diagram">
+          <svg width="780" height="360" viewBox="0 0 780 360">
+            <line x1="90" y1="300" x2="710" y2="300" stroke="#334155" stroke-width="2"/><line x1="90" y1="300" x2="90" y2="40" stroke="#334155" stroke-width="2"/>
+            <text x="400" y="335" text-anchor="middle" font-size="14">Arithmetic Intensity: FLOPs / Byte</text>
+            <text x="28" y="175" transform="rotate(-90 28,175)" text-anchor="middle" font-size="14">Performance</text>
+            <polyline points="90,300 280,180 710,65" fill="none" stroke="#2563eb" stroke-width="4"/>
+            <line x1="280" y1="180" x2="280" y2="60" stroke="#64748b" stroke-dasharray="5 5"/>
+            <text x="170" y="230" fill="#dc2626" font-size="15">Memory Bound</text>
+            <text x="460" y="110" fill="#16a34a" font-size="15">Compute Bound</text>
+            <circle cx="160" cy="250" r="8" fill="#f97316"/><text x="175" y="255" font-size="12">LayerNorm / Softmax</text>
+            <circle cx="560" cy="105" r="8" fill="#7c3aed"/><text x="575" y="110" font-size="12">GEMM / MLP</text>
+            <circle cx="340" cy="160" r="8" fill="#2563eb"/><text x="355" y="165" font-size="12">Attention</text>
+          </svg>
+          <div class="caption">Roofline 思维：先判断 kernel 是 memory bound 还是 compute bound。不同瓶颈对应完全不同的优化手段。</div>
+        </div>
+        <h3>4.2 必看指标</h3>
+        <table>
+          <tr><th>指标</th><th>怎么看</th><th>优化方向</th></tr>
+          <tr><td>SM Throughput</td><td>SM 是否忙</td><td>提高并行度、减少 stall、优化 occupancy</td></tr>
+          <tr><td>Memory Throughput</td><td>HBM/L2 是否接近峰值</td><td>coalescing、减少访存、fusion、shared memory</td></tr>
+          <tr><td>Tensor Core Utilization</td><td>GEMM 是否用到 Tensor Core</td><td>shape 对齐、使用 FP16/BF16/FP8、CUTLASS/cuBLASLt</td></tr>
+          <tr><td>Warp Stall Long Scoreboard</td><td>等待 global memory 结果</td><td>prefetch、tiling、提高数据复用、cp.async</td></tr>
+          <tr><td>Warp Stall Barrier</td><td>等待同步</td><td>减少 __syncthreads、warp-level primitive</td></tr>
+          <tr><td>Register / thread</td><td>寄存器过多会降低 occupancy</td><td>减少 live range、拆 kernel、launch_bounds</td></tr>
+          <tr><td>Shared Memory Bank Conflict</td><td>shared load/store 被 bank conflict 放大</td><td>padding、调整布局、向量化访问</td></tr>
+        </table>
+        <pre><code># 采集单 kernel 详细指标
+ncu --set full \
+  --target-processes all \
+  --kernel-name regex:layer_norm \
+  -o reports/layernorm_ncu \
+  python repro_layernorm.py
+
+# 只看关键 section，速度更快
+ncu --section SpeedOfLight --section MemoryWorkloadAnalysis --section SchedulerStats python repro.py</code></pre>
+      </section>
+
+      <section id="kernel">
+        <h2>5. CUDA Kernel 优化</h2>
+        <p>Kernel 优化的核心不是“堆技巧”，而是针对瓶颈选策略。</p>
+        <h3>5.1 内存层级示意</h3>
+        <div class="diagram">
+          <svg width="980" height="330" viewBox="0 0 980 330">
+            <rect x="60" y="50" width="160" height="70" rx="12" fill="#fee2e2" stroke="#dc2626"/><text x="140" y="80" text-anchor="middle" font-size="15">HBM</text><text x="140" y="102" text-anchor="middle" font-size="12">大 / 慢 / 高带宽</text>
+            <rect x="290" y="50" width="160" height="70" rx="12" fill="#ffedd5" stroke="#f97316"/><text x="370" y="80" text-anchor="middle" font-size="15">L2 Cache</text><text x="370" y="102" text-anchor="middle" font-size="12">跨 SM 共享</text>
+            <rect x="520" y="50" width="160" height="70" rx="12" fill="#dcfce7" stroke="#16a34a"/><text x="600" y="80" text-anchor="middle" font-size="15">Shared Memory</text><text x="600" y="102" text-anchor="middle" font-size="12">块内共享 / 快</text>
+            <rect x="750" y="50" width="160" height="70" rx="12" fill="#dbeafe" stroke="#2563eb"/><text x="830" y="80" text-anchor="middle" font-size="15">Register</text><text x="830" y="102" text-anchor="middle" font-size="12">线程私有 / 最快</text>
+            <line x1="220" y1="85" x2="290" y2="85" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><line x1="450" y1="85" x2="520" y2="85" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><line x1="680" y1="85" x2="750" y2="85" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <text x="485" y="180" text-anchor="middle" font-size="16" fill="#334155">优化目标：减少 HBM 往返，把数据复用留在 L2 / Shared / Register</text>
+            <rect x="150" y="225" width="680" height="55" rx="12" fill="#f1f5f9" stroke="#cbd5e1"/><text x="490" y="258" text-anchor="middle" font-size="14">典型手段：tiling、fusion、vectorized load/store、coalescing、cp.async、double buffering</text>
+          </svg>
+        </div>
+
+        <h3>5.2 Memory Bound Kernel：LayerNorm / Softmax / Elementwise</h3>
+        <p>这类 kernel 的优化目标是减少 HBM 访问次数，提升访存合并和数据复用。</p>
+        <table>
+          <tr><th>问题</th><th>Trace / NCU 信号</th><th>优化手段</th></tr>
+          <tr><td>多次读写 HBM</td><td>Memory Throughput 高，SM Throughput 低</td><td>fuse bias + gelu + dropout；fuse residual + layernorm</td></tr>
+          <tr><td>访存不连续</td><td>Global Load Efficiency 低</td><td>coalesced access，向量化 load：float4 / half2</td></tr>
+          <tr><td>shared memory bank conflict</td><td>Shared replay / bank conflict 高</td><td>padding，换 layout，warp-level reduce</td></tr>
+          <tr><td>同步过多</td><td>Stall Barrier 高</td><td>减少 block-wide sync，使用 warp shuffle</td></tr>
+        </table>
+
+        <h3>5.3 Compute Bound Kernel：GEMM / MLP</h3>
+        <p>这类 kernel 目标是吃满 Tensor Core。</p>
+        <ul>
+          <li>矩阵维度尽量对齐 Tensor Core tile，例如 8/16/32 的倍数。</li>
+          <li>使用 BF16/FP16/FP8；确认没有 fallback 到 FP32 CUDA core。</li>
+          <li>使用 cuBLASLt / CUTLASS / Transformer Engine 的 tuned kernel。</li>
+          <li>注意 small GEMM：MoE、micro batch 太小、专家切分过细会导致 GEMM 尺寸变小，Tensor Core 利用率下降。</li>
+        </ul>
+
+        <h3>5.4 Kernel Fusion</h3>
+        <p>Transformer 中常见可融合区域：</p>
+        <pre><code>Linear + Bias
+Bias + GELU
+Dropout + Residual + LayerNorm
+Scale + Mask + Softmax
+AdamW update
+RMSNorm
+Rotary Embedding</code></pre>
+        <div class="callout ok"><strong>判断是否值得融合：</strong>如果 nsys 里看到很多 5～30 微秒的小 kernel，且中间有 HBM 往返，fusion 通常有效。如果瓶颈是大 GEMM，fusion 收益有限。</div>
+
+        <h3>5.5 一个 LayerNorm Kernel 学习项目</h3>
+        <ol>
+          <li>先用 PyTorch 实现 baseline，并采 nsys/ncu。</li>
+          <li>写 naive CUDA：每行一个 block，计算 mean/var。</li>
+          <li>用 warp reduce 替代 shared memory reduce。</li>
+          <li>用 half2/float4 做向量化读写。</li>
+          <li>尝试 fuse residual + layernorm。</li>
+          <li>对比 PyTorch、Apex、Transformer Engine。</li>
+        </ol>
+      </section>
+
+      <section id="attention">
+        <h2>6. Attention / FlashAttention 优化</h2>
+        <p>标准 attention 最大问题是中间矩阵 <code>QK^T</code> 太大，读写 HBM 成本高。FlashAttention 的核心是 tile + online softmax，避免保存完整 attention matrix。</p>
+        <div class="diagram">
+          <svg width="980" height="310" viewBox="0 0 980 310">
+            <rect x="50" y="55" width="160" height="160" rx="10" fill="#dbeafe" stroke="#2563eb"/><text x="130" y="140" text-anchor="middle" font-size="18">Q Block</text>
+            <rect x="300" y="35" width="180" height="90" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="390" y="86" text-anchor="middle" font-size="18">K Block</text>
+            <rect x="300" y="165" width="180" height="90" rx="10" fill="#dcfce7" stroke="#16a34a"/><text x="390" y="216" text-anchor="middle" font-size="18">V Block</text>
+            <line x1="210" y1="130" x2="300" y2="80" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/><line x1="210" y1="145" x2="300" y2="210" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="560" y="70" width="170" height="150" rx="10" fill="#fef3c7" stroke="#f59e0b"/><text x="645" y="125" text-anchor="middle" font-size="16">Online Softmax</text><text x="645" y="153" text-anchor="middle" font-size="13">维护 row max / sum</text><text x="645" y="178" text-anchor="middle" font-size="13">不落完整 QK^T</text>
+            <line x1="480" y1="145" x2="560" y2="145" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect x="805" y="95" width="120" height="100" rx="10" fill="#ede9fe" stroke="#7c3aed"/><text x="865" y="150" text-anchor="middle" font-size="18">O Block</text>
+            <line x1="730" y1="145" x2="805" y2="145" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+          </svg>
+          <div class="caption">优化重点：tile size、shared memory 复用、寄存器占用、warp specialization、double buffer、cp.async。</div>
+        </div>
+        <h3>Trace 中怎么识别 Attention 瓶颈</h3>
+        <table>
+          <tr><th>现象</th><th>解释</th><th>优化</th></tr>
+          <tr><td>attention kernel 时间随 seq_len 二次增长</td><td>标准 attention 或 backend 不合适</td><td>切换 FlashAttention / cuDNN attention，检查 mask/dropout/shape 是否触发 fallback</td></tr>
+          <tr><td>FlashAttention occupancy 低</td><td>寄存器/shared memory 过多，tile 不合适</td><td>调 head_dim、block size，查看 register pressure</td></tr>
+          <tr><td>Stall Long Scoreboard 高</td><td>等待 HBM/L2</td><td>提高 K/V tile 复用，使用 prefetch / cp.async</td></tr>
+          <tr><td>小 batch 长序列效率差</td><td>并行度不足</td><td>sequence parallel/context parallel，调整 batch/seq 切分</td></tr>
+        </table>
+      </section>
+
+      <section id="comm">
+        <h2>7. NCCL 与通信重叠</h2>
+        <p>大模型分布式训练的主要通信包括 DP 的 gradient reduce-scatter/all-reduce、TP 的 all-reduce/reduce-scatter、PP 的 P2P send/recv、MoE 的 all-to-all。</p>
+        <h3>7.1 通信重叠示意</h3>
+        <div class="diagram">
+          <svg width="1000" height="330" viewBox="0 0 1000 330">
+            <text x="30" y="45" font-size="15" font-weight="600">坏：串行通信</text>
+            <text x="30" y="92" font-size="12">Compute</text><rect x="120" y="70" width="190" height="32" rx="5" fill="#86efac"/><text x="215" y="91" font-size="12" text-anchor="middle">Backward layer 3</text><rect x="315" y="70" width="190" height="32" rx="5" fill="#86efac"/><text x="410" y="91" font-size="12" text-anchor="middle">Backward layer 2</text>
+            <text x="30" y="142" font-size="12">NCCL</text><rect x="510" y="120" width="170" height="32" rx="5" fill="#ddd6fe"/><text x="595" y="141" font-size="12" text-anchor="middle">ReduceScatter</text><rect x="685" y="120" width="170" height="32" rx="5" fill="#ddd6fe"/><text x="770" y="141" font-size="12" text-anchor="middle">AllGather</text>
+            <text x="30" y="215" font-size="15" font-weight="600">好：通信与 backward 重叠</text>
+            <text x="30" y="262" font-size="12">Compute</text><rect x="120" y="240" width="190" height="32" rx="5" fill="#86efac"/><text x="215" y="261" font-size="12" text-anchor="middle">Backward layer 3</text><rect x="315" y="240" width="190" height="32" rx="5" fill="#86efac"/><text x="410" y="261" font-size="12" text-anchor="middle">Backward layer 2</text><rect x="510" y="240" width="170" height="32" rx="5" fill="#86efac"/><text x="595" y="261" font-size="12" text-anchor="middle">Backward layer 1</text>
+            <text x="30" y="305" font-size="12">NCCL</text><rect x="250" y="285" width="170" height="32" rx="5" fill="#ddd6fe"/><text x="335" y="306" font-size="12" text-anchor="middle">Grad RS L3</text><rect x="445" y="285" width="170" height="32" rx="5" fill="#ddd6fe"/><text x="530" y="306" font-size="12" text-anchor="middle">Grad RS L2</text><rect x="640" y="285" width="170" height="32" rx="5" fill="#ddd6fe"/><text x="725" y="306" font-size="12" text-anchor="middle">Grad RS L1</text>
+          </svg>
+        </div>
+        <h3>7.2 NCCL 排查步骤</h3>
+        <ol>
+          <li>先确认通信类型：DP、TP、PP、EP 哪一种。</li>
+          <li>看通信是否暴露：如果 NCCL 完全在 compute 后面，说明没有 overlap。</li>
+          <li>看每个 rank 的 NCCL 时间是否一致：不一致要查 straggler。</li>
+          <li>看节点内与跨节点通信：TP 最好放在 NVLink/NVSwitch 内，DP 跨节点更常见。</li>
+          <li>查 NCCL log：算法、通道数、网卡选择、GDR 是否启用。</li>
+        </ol>
+        <pre><code>export NCCL_DEBUG=INFO
+export NCCL_DEBUG_SUBSYS=INIT,COLL,NET
+export NCCL_IB_DISABLE=0
+export NCCL_NET_GDR_LEVEL=5
+export CUDA_DEVICE_MAX_CONNECTIONS=1
+
+# 常见测试
+all_reduce_perf -b 8M -e 4G -f 2 -g 8
+ib_write_bw
+nvidia-smi topo -m</code></pre>
+        <h3>7.3 Ring AllReduce 直觉</h3>
+        <p>Ring AllReduce 可以拆成 reduce-scatter + all-gather。优化关注 chunk size、pipeline、链路带宽和慢 rank。</p>
+      </section>
+
+      <section id="system">
+        <h2>8. 系统与集群优化</h2>
+        <h3>8.1 拓扑感知 Rank Mapping</h3>
+        <p>并行维度要映射到正确硬件链路。一般原则：</p>
+        <ul>
+          <li>TP 通信频繁且量大，优先放节点内 NVLink/NVSwitch。</li>
+          <li>PP 需要 P2P，尽量让相邻 stage 在高速链路或同节点。</li>
+          <li>DP 可跨节点，但要确保 IB 带宽和 GDR 正常。</li>
+          <li>MoE EP 的 all-to-all 对网络很敏感，必须关注跨节点 expert 分布。</li>
+        </ul>
+        <div class="diagram">
+          <svg width="980" height="270" viewBox="0 0 980 270">
+            <rect x="70" y="40" width="360" height="180" rx="18" fill="#eff6ff" stroke="#2563eb"/><text x="250" y="68" text-anchor="middle" font-size="16">Node 0 / 8 GPUs / NVSwitch</text>
+            <rect x="550" y="40" width="360" height="180" rx="18" fill="#f0fdf4" stroke="#16a34a"/><text x="730" y="68" text-anchor="middle" font-size="16">Node 1 / 8 GPUs / NVSwitch</text>
+            <g fill="#bfdbfe" stroke="#2563eb">
+              <rect x="95" y="95" width="58" height="42" rx="7"/><rect x="165" y="95" width="58" height="42" rx="7"/><rect x="235" y="95" width="58" height="42" rx="7"/><rect x="305" y="95" width="58" height="42" rx="7"/>
+              <rect x="95" y="155" width="58" height="42" rx="7"/><rect x="165" y="155" width="58" height="42" rx="7"/><rect x="235" y="155" width="58" height="42" rx="7"/><rect x="305" y="155" width="58" height="42" rx="7"/>
+            </g>
+            <g fill="#bbf7d0" stroke="#16a34a">
+              <rect x="575" y="95" width="58" height="42" rx="7"/><rect x="645" y="95" width="58" height="42" rx="7"/><rect x="715" y="95" width="58" height="42" rx="7"/><rect x="785" y="95" width="58" height="42" rx="7"/>
+              <rect x="575" y="155" width="58" height="42" rx="7"/><rect x="645" y="155" width="58" height="42" rx="7"/><rect x="715" y="155" width="58" height="42" rx="7"/><rect x="785" y="155" width="58" height="42" rx="7"/>
+            </g>
+            <line x1="430" y1="130" x2="550" y2="130" stroke="#7c3aed" stroke-width="5"/><text x="490" y="115" text-anchor="middle" font-size="13" fill="#7c3aed">IB / RoCE</text>
+            <text x="250" y="242" text-anchor="middle" font-size="13">TP=8 放节点内</text><text x="730" y="242" text-anchor="middle" font-size="13">DP 跨节点</text>
+          </svg>
+        </div>
+
+        <h3>8.2 NUMA / CPU Affinity</h3>
+        <p>常见问题：GPU 在 Socket0 下，但训练进程或 DataLoader worker 被调度到 Socket1，导致 PCIe/内存访问绕路。</p>
+        <pre><code># 查看 GPU / NIC / CPU 拓扑
+nvidia-smi topo -m
+lstopo
+numactl --hardware
+
+# 绑定 CPU / NUMA 示例
+numactl --cpunodebind=0 --membind=0 python train.py
+taskset -c 0-63 python train.py</code></pre>
+        <h3>8.3 IB / RDMA / GDR</h3>
+        <table>
+          <tr><th>检查项</th><th>命令/指标</th><th>异常表现</th></tr>
+          <tr><td>网卡是否正常</td><td>ibstat, ibv_devinfo</td><td>端口 down、速率不对</td></tr>
+          <tr><td>带宽</td><td>ib_write_bw</td><td>200Gb 只跑出 80Gb</td></tr>
+          <tr><td>GPU Direct RDMA</td><td>NCCL log 中 NET/GDR</td><td>走 CPU bounce buffer</td></tr>
+          <tr><td>错误包/重传</td><td>perfquery, switch counter</td><td>NCCL 长尾、step 抖动</td></tr>
+        </table>
+        <h3>8.4 系统层常见坑</h3>
+        <ul>
+          <li>GPU 降频：功耗、温度、ECC 错误导致性能波动。</li>
+          <li>PCIe ACS/IOMMU 设置影响 P2P/GDR。</li>
+          <li>容器内没有正确挂载 RDMA device。</li>
+          <li>多租户网络拥塞导致 NCCL 长尾。</li>
+          <li>日志/监控过重，step 内频繁 <code>tensor.item()</code> 造成同步。</li>
+        </ul>
+      </section>
+
+      <section id="data">
+        <h2>9. 数据与 Checkpoint IO</h2>
+        <h3>9.1 DataLoader 瓶颈</h3>
+        <p>Trace 中如果 GPU 空洞与 CPU DataLoader 时间吻合，优先优化数据路径。</p>
+        <ul>
+          <li>使用 mmap / streaming dataset，避免大量小文件随机读。</li>
+          <li>预 tokenization，训练时不要做重 CPU 文本处理。</li>
+          <li>增加 prefetch，pin memory，异步 H2D copy。</li>
+          <li>检查 worker 数量与 CPU 核数、NUMA、磁盘带宽。</li>
+          <li>对多节点训练，避免所有 rank 读取同一个远程存储热点。</li>
+        </ul>
+        <h3>9.2 Checkpoint IO</h3>
+        <p>大模型 checkpoint 会造成 IO 风暴。优化目标是异步、分片、限流、可恢复。</p>
+        <div class="diagram">
+          <svg width="900" height="210" viewBox="0 0 900 210">
+            <text x="45" y="45" font-size="15" font-weight="600">同步 checkpoint：训练暂停</text>
+            <rect x="190" y="25" width="190" height="32" rx="5" fill="#86efac"/><text x="285" y="46" font-size="12" text-anchor="middle">Train Step</text><rect x="385" y="25" width="210" height="32" rx="5" fill="#fca5a5"/><text x="490" y="46" font-size="12" text-anchor="middle">Save Checkpoint</text><rect x="600" y="25" width="190" height="32" rx="5" fill="#86efac"/><text x="695" y="46" font-size="12" text-anchor="middle">Train Step</text>
+            <text x="45" y="135" font-size="15" font-weight="600">异步 checkpoint：后台写</text>
+            <rect x="190" y="115" width="190" height="32" rx="5" fill="#86efac"/><text x="285" y="136" font-size="12" text-anchor="middle">Train Step</text><rect x="385" y="115" width="190" height="32" rx="5" fill="#86efac"/><text x="480" y="136" font-size="12" text-anchor="middle">Train Step</text><rect x="580" y="115" width="190" height="32" rx="5" fill="#86efac"/><text x="675" y="136" font-size="12" text-anchor="middle">Train Step</text>
+            <rect x="385" y="155" width="300" height="28" rx="5" fill="#fed7aa"/><text x="535" y="174" font-size="12" text-anchor="middle">background shard upload</text>
+          </svg>
+        </div>
+      </section>
+
+      <section id="megatron">
+        <h2>10. Megatron 实战项目</h2>
+        <h3>项目 A：单机 8 卡 LLaMA/GPT 训练性能基线</h3>
+        <p><strong>目标：</strong>建立 baseline，输出 nsys trace、tokens/s、MFU、GPU busy、NCCL 时间占比。</p>
+        <pre><code>实验产出：
+1. baseline 配置
+2. 10 step 平均 step time
+3. nsys 截图与解读
+4. GPU 空洞 / NCCL / kernel 时间占比
+5. 下一步优化计划</code></pre>
+
+        <h3>项目 B：通信重叠验证</h3>
+        <p><strong>目标：</strong>对比打开/关闭 grad reduce overlap、param gather overlap、tp comm overlap 的 trace 差异。</p>
+        <pre><code>对比维度：
+- NCCL 是否与 backward overlap
+- exposed NCCL time 是否降低
+- step time 是否降低
+- 是否引入显存增加或不稳定</code></pre>
+
+        <h3>项目 C：LayerNorm / RMSNorm Kernel</h3>
+        <p><strong>目标：</strong>从 naive CUDA 到 warp reduce，再到 fused residual norm，完成 ncu 报告。</p>
+
+        <h3>项目 D：双机 16 卡 Rank Mapping</h3>
+        <p><strong>目标：</strong>证明不同 TP/DP 映射对通信性能的影响。</p>
+      </section>
+
+      <section id="checklists">
+        <h2>11. 排查清单</h2>
+        <h3>训练慢：先问这 10 个问题</h3>
+        <ol>
+          <li>step time 是稳定慢，还是偶发长尾？</li>
+          <li>GPU timeline 有没有空洞？</li>
+          <li>CPU 线程有没有长时间阻塞？</li>
+          <li>CUDA API 里有没有 synchronize / malloc / memcpy？</li>
+          <li>NCCL 是否暴露在 compute 之外？</li>
+          <li>慢的是所有 rank，还是某几个 rank？</li>
+          <li>DataLoader 是否跑满 CPU/磁盘？</li>
+          <li>Kernel 是 memory bound 还是 compute bound？</li>
+          <li>GPU 是否降频、温度/功耗/ECC 是否异常？</li>
+          <li>拓扑是否合理：TP/PP/DP/EP 是否映射到正确链路？</li>
+        </ol>
+        <h3>优化优先级</h3>
+        <div class="callout">先解决端到端大瓶颈：GPU idle、DataLoader、NCCL exposed、straggler。只有当 trace 证明单个 kernel 是主要瓶颈时，才进入 CUDA kernel 深度优化。</div>
+      </section>
+
+      <section id="plan">
+        <h2>12. 12 周实践路线</h2>
+        <table>
+          <tr><th>周数</th><th>主题</th><th>实践产出</th></tr>
+          <tr><td>1</td><td>Linux / GPU / CUDA 基础</td><td>nvidia-smi topo、numactl、CUDA sample 跑通</td></tr>
+          <tr><td>2</td><td>Nsight Systems</td><td>采集一个 PyTorch 训练 trace 并写分析报告</td></tr>
+          <tr><td>3</td><td>Nsight Compute</td><td>分析 layernorm / matmul 两类 kernel</td></tr>
+          <tr><td>4</td><td>CUDA Kernel 入门</td><td>写 vector add、reduce、layernorm naive 版</td></tr>
+          <tr><td>5</td><td>Memory 优化</td><td>coalescing、shared memory、bank conflict 实验</td></tr>
+          <tr><td>6</td><td>GEMM / Tensor Core</td><td>理解 CUTLASS tile，跑 cuBLASLt benchmark</td></tr>
+          <tr><td>7</td><td>FlashAttention</td><td>画出 tile + online softmax 流程，跑不同 seq_len benchmark</td></tr>
+          <tr><td>8</td><td>NCCL</td><td>all_reduce_perf、NCCL log、单机/双机通信测试</td></tr>
+          <tr><td>9</td><td>通信重叠</td><td>对比 overlap 开关下的 Megatron trace</td></tr>
+          <tr><td>10</td><td>系统优化</td><td>NUMA/rank mapping/IB/GDR 排查报告</td></tr>
+          <tr><td>11</td><td>Megatron Baseline</td><td>单机 8 卡训练性能报告</td></tr>
+          <tr><td>12</td><td>综合项目</td><td>完成一个“现象 → trace → 根因 → 优化 → 验证”的完整案例</td></tr>
+        </table>
+        <div class="callout ok"><strong>最终作品集：</strong>建议把每个项目沉淀成 GitHub repo：代码、命令、trace 截图、分析文档、优化前后数据。这比只写“熟悉 CUDA/NCCL/Megatron”更有说服力。</div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
