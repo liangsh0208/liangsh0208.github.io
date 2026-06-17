@@ -3,7 +3,7 @@ created: 2026-06-16
 published: 2025-09-02
 paper: https://arxiv.org/abs/2509.02208
 code: https://github.com/baichuan-inc/Baichuan-M2
-authors: Baichuan-M2 Team (Chengfeng Dou, Chong Liu*, Fan Yang, Fei Li, Jiyuan Jia, Mingyang Chen, Qiang Ju, Shuai Wang, Shunya Dang, Tianpeng Li, Xiangrong Zeng, Yijie Zhou, Chenzheng Zhu*, Da Pan, Fei Deng, Guangwei Ai, Guosheng Dong, Hongda Zhang, Jinyang Tai, Jixiang Hong*, Kai Lu, Linzhuang Sun, Peidong Guo, Qian Ma*, Rihui Xin, Shihui Yang, Shusen Zhang, Yichuan Mo, Zheng Liang; Experts: Xiaochuan Wang, Zuyi Zhu, Hengfu Cui, Zhishou Zhang)
+authors: "Baichuan-M2 Team (Chengfeng Dou, Chong Liu*, Fan Yang, Fei Li, Jiyuan Jia, Mingyang Chen, Qiang Ju, Shuai Wang, Shunya Dang, Tianpeng Li, Xiangrong Zeng, Yijie Zhou, Chenzheng Zhu*, Da Pan, Fei Deng, Guangwei Ai, Guosheng Dong, Hongda Zhang, Jinyang Tai, Jixiang Hong*, Kai Lu, Linzhuang Sun, Peidong Guo, Qian Ma*, Rihui Xin, Shihui Yang, Shusen Zhang, Yichuan Mo, Zheng Liang; Experts: Xiaochuan Wang, Zuyi Zhu, Hengfu Cui, Zhishou Zhang)"
 tags:
   - LLM
   - Medical-AI
@@ -146,6 +146,10 @@ graph TD
 | Personification Score | 89.2 | 人格与社会文化一致性高 |
 
 > *论文披露*：DeepSeek-V3 加入心理信息后 Privacy/Fact Score 显著下降，说明简单 prompt 方式会引入过多随机噪声；Baichuan-M2 三模块设计在提升人格化分数同时保持高稳定性。
+
+![](BaichuanM2_fig3_patient_simulator_comp.png)
+
+> **Figure 3**: Patient Simulator 对比实验。Baichuan-M2 方案在提升 Personification Score 的同时保持了 Privacy (98.3) 和 Fact (96.1) 的高稳定性。
 
 #### 3.1.2 Clinical Rubrics Generator
 
@@ -341,6 +345,18 @@ graph TD
 
 **开源模型对比（Figure 6）**：
 
+![](BaichuanM2_fig6a_open_overall.png)
+
+> **Figure 6 (a)**: HealthBench 开源模型 Overall 对比。
+
+![](BaichuanM2_fig6b_open_hard.png)
+
+> **Figure 6 (b)**: HealthBench 开源模型 Hard 对比。
+
+![](BaichuanM2_fig6c_open_consensus.png)
+
+> **Figure 6 (c)**: HealthBench 开源模型 Consensus 对比。
+
 | 模型 | 参数 | Overall | Hard | Consensus |
 |------|------|---------|------|-----------|
 | **Baichuan-M2** | **32B** | **60.1** | **34.7** | **91.5** |
@@ -353,6 +369,18 @@ graph TD
 | Qwen2.5-32B | 32B | 28.2 | *论文未披露* | 84.3 |
 
 **闭源模型对比（Figure 7）**：
+
+![](BaichuanM2_fig7a_closed_overall.png)
+
+> **Figure 7 (a)**: HealthBench 闭源模型 Overall 对比。
+
+![](BaichuanM2_fig7b_closed_hard.png)
+
+> **Figure 7 (b)**: HealthBench 闭源模型 Hard 对比。
+
+![](BaichuanM2_fig7c_closed_consensus.png)
+
+> **Figure 7 (c)**: HealthBench 闭源模型 Consensus 对比。
 
 | 模型 | Overall | Hard | Consensus |
 |------|---------|------|-----------|
