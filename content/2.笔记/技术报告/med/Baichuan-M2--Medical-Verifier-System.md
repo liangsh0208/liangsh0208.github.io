@@ -91,6 +91,10 @@ tags:
 
 **直觉解释**：传统验证是“开卷考试”，真实临床是“侦探小说”。Verifier System 把训练环境从静态 QA 升级为持续交互的“虚拟临床世界”。
 
+![](BaichuanM2_fig1_verifier_system.png)
+
+> **Figure 1**: Verifier System Framework。Patient Simulator 构建真实临床环境，Clinical Rubrics Generator 动态生成多维评估，AI Doctor（M2）与之闭环交互。
+
 ```mermaid
 graph TD
     subgraph 动态验证框架
@@ -179,6 +183,10 @@ graph TD
 **Affinity Mechanism**：多个 rubric 评估 prompt 共享同一对话前缀，仅 rubric 描述不同；论文将其路由到同一 serving 实例以提升 KV cache 复用，降低 verifier 开销。
 
 ### 3.2 数据与训练 Pipeline
+
+![](BaichuanM2_fig4_training_pipeline.png)
+
+> **Figure 4**: Training Pipeline 总览。Mid-Training → SFT → RL（Rule-based → Rubric-based → Multi-turn）。Mid-Training 阶段通过 KL loss 保持通用和数学能力；SFT 阶段构建带推理的医学对话数据；RL 阶段通过多阶段递进式 GRPO 强化动态临床能力。
 
 ```mermaid
 graph TD
@@ -281,6 +289,10 @@ $$R_{length}(q, o_i) = \begin{cases} \frac{4}{\sqrt{|o_i|}}, & \text{if } P_{80}
 - 每轮后提取对话切片，Rubrics Generator 生成上下文相关 rubric，模型基于切片生成下一回复并被评估。
 - **Interaction Filtering**：论文明确说明 Patient Simulator 仍可能引入噪声（重复生成、过长对话、角色反转），因此只保留语义连贯、因果合理的片段；fragment-level 训练提高信噪比、缓解累积上下文错误与奖励泄漏。
 - 局限：当前仍是 fragment-level，论文计划扩展到完整 session-level RL。
+
+![](BaichuanM2_fig5_length_penalty.png)
+
+> **Figure 5**: Impact of length penalty。模型在保持性能增长的同时有效压缩了长度（左图）；w/ length penalty 相比 w/o，response length 显著下降（右图）。所有结果在 HealthBench 随机子集上评估。
 
 ---
 
